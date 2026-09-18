@@ -1,7 +1,13 @@
 # 🏥 Apollo Care - Hospital Appointment & Real-Time Queue Management System
 > **12-Week Solo Build Plan • Major Academic Project & Real Clinic Pilot**
 
+[![Comprehensive Technical Documentation](https://img.shields.io/badge/Documentation-Complete_Technical_Guide-blue.svg)](./PROJECT_DOCUMENTATION.md)
+[![Cloud Deployment Guide](https://img.shields.io/badge/Deployment-Vercel_%2B_Render_%2B_Supabase-green.svg)](./DEPLOYMENT_GUIDE.md)
+
 Apollo Care is a full-stack, real-time healthcare appointment and OPD queue management platform designed for standalone clinics, multi-doctor polyclinics, and hospital outpatient departments. It eliminates chaotic waiting room crowds by synchronizing patient mobile devices, reception desks, doctor consultation rooms, and large-format waiting room TV displays in real time over WebSockets.
+
+👉 **Looking for full system architecture, workflows, diagrams, and Viva exam Q&A? Read the [Complete Project Documentation](./PROJECT_DOCUMENTATION.md).**
+
 
 ---
 
