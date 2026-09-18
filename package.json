@@ -1,0 +1,11 @@
+{
+  "name": "hospital-appointment-and-queue-management-system",
+  "version": "1.0.0",
+  "description": "Hospital Appointment & Real-Time Queue Management System - 12-Week Solo Build Plan Major Project",
+  "scripts": {
+    "server": "npm --prefix server start",
+    "client": "npm --prefix client dev",
+    "build:client": "npm --prefix client run build",
+    "seed": "npm --prefix server run seed"
+  }
+}
