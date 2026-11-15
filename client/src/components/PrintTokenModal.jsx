@@ -29,7 +29,7 @@ export const PrintTokenModal = ({ token, clinic, onClose, onTrack }) => {
           {/* Clinic Header */}
           <div className="border-b-2 border-dashed border-slate-300 pb-3 mb-4">
             <h3 className="font-extrabold text-base tracking-tight uppercase text-slate-900">
-              {clinic?.name || 'Apollo Care Health Clinic'}
+              {clinic?.name || 'MediQ Health Clinic'}
             </h3>
             <p className="text-[11px] text-slate-600 mt-0.5">
               {clinic?.address || '42 Health City Avenue, Medical District'}

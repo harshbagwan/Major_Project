@@ -1,16 +1,16 @@
 @echo off
-title Apollo Care - Hospital Queue Management System
+title MediQ - Hospital Queue & OPD Management System
 echo =============================================================
-echo   APOLLO CARE - HOSPITAL APPOINTMENT & QUEUE MANAGEMENT SYSTEM
+echo   MEDIQ - SMART HOSPITAL APPOINTMENT & OPD QUEUE SYSTEM
 echo =============================================================
-echo Starting Backend Server and Frontend Client...
+echo Starting Backend Server (SQLite3 + Socket.io) and Frontend Client (Vite)...
 echo.
 
-set "PATH=%LOCALAPPDATA%\Programs\nodejs;%PATH%"
+set "PATH=%LOCALAPPDATA%\Programs\nodejs;C:\Program Files\nodejs;%PATH%"
 
-start "Apollo Care Backend Server (Port 5000)" cmd /k "cd /d "%~dp0server" && node src/server.js"
+start "MediQ Backend Server (Port 5000)" cmd /k "cd /d "%~dp0server" && node src/server.js"
 timeout /t 2 >nul
-start "Apollo Care Frontend Client (Port 5173)" cmd /k "cd /d "%~dp0client" && npm run dev"
+start "MediQ Frontend Client (Port 5173)" cmd /k "cd /d "%~dp0client" && npm.cmd run dev"
 
 echo.
 echo =============================================================
@@ -18,5 +18,6 @@ echo System Started Successfully!
 echo - Web Dashboard & Booking: http://localhost:5173
 echo - Backend REST & Socket:  http://localhost:5000
 echo - Live Waiting Room TV:   http://localhost:5173 (Select TV Signage tab)
+echo - Database Engine:        SQLite3 (data/mediq.sqlite with WAL mode)
 echo =============================================================
 timeout /t 5

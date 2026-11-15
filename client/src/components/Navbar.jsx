@@ -80,7 +80,7 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
-                Apollo Care
+                MediQ
               </span>
               <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider">
                 Smart OPD

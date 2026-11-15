@@ -1,10 +1,10 @@
-# 🏥 Apollo Care - Hospital Appointment & Real-Time Queue Management System
+# 🏥 MediQ - Hospital Appointment & Real-Time Queue Management System
 > **12-Week Solo Build Plan • Major Academic Project & Real Clinic Pilot**
 
 [![Comprehensive Technical Documentation](https://img.shields.io/badge/Documentation-Complete_Technical_Guide-blue.svg)](./PROJECT_DOCUMENTATION.md)
 [![Cloud Deployment Guide](https://img.shields.io/badge/Deployment-Vercel_%2B_Render_%2B_Supabase-green.svg)](./DEPLOYMENT_GUIDE.md)
 
-Apollo Care is a full-stack, real-time healthcare appointment and OPD queue management platform designed for standalone clinics, multi-doctor polyclinics, and hospital outpatient departments. It eliminates chaotic waiting room crowds by synchronizing patient mobile devices, reception desks, doctor consultation rooms, and large-format waiting room TV displays in real time over WebSockets.
+MediQ is a full-stack, real-time healthcare appointment and OPD queue management platform designed for standalone clinics, multi-doctor polyclinics, and hospital outpatient departments. It eliminates chaotic waiting room crowds by synchronizing patient mobile devices, reception desks, doctor consultation rooms, and large-format waiting room TV displays in real time over WebSockets.
 
 👉 **Looking for full system architecture, workflows, diagrams, and Viva exam Q&A? Read the [Complete Project Documentation](./PROJECT_DOCUMENTATION.md).**
 
@@ -44,7 +44,7 @@ Apollo Care is a full-stack, real-time healthcare appointment and OPD queue mana
 - **Real Usage KPIs**: Total Patients Seen, Walk-ins vs. Online Bookings, Average Wait Time, and Doctor Load Distribution.
 - **Before vs. After Pilot Impact Metrics**:
   - Traditional Waiting Room Wait: **52 minutes**
-  - With Apollo Care Smart Queue: **~12–14 minutes**
+  - With MediQ Smart Queue: **~12–14 minutes**
   - **73% Reduction in Patient Wait Times**
   - **74% Reduction in Waiting Room Overcrowding**
   - **4.8 / 5.0 Patient Satisfaction Score**
@@ -181,7 +181,8 @@ To demonstrate sub-second real-time queue synchronization (e.g. for a viva or cl
 
 When presenting this project for your final year evaluation or viva, emphasize these 4 distinguishing points:
 
-1. **Real-Time Dual Architecture**: Unlike standard CRUD hospital portals, Apollo Care incorporates WebSockets (Socket.io) and Web Audio synthesis for sub-second waiting room TV announcements.
+1. **Real-Time Dual Architecture**: Unlike standard CRUD hospital portals, MediQ incorporates WebSockets (Socket.io) and Web Audio synthesis for sub-second waiting room TV announcements.
 2. **True Frictionless Patient UX**: Zero app download required. Patients book via mobile web, receive automated WhatsApp links, and track their position from anywhere within 500 meters of the clinic.
 3. **Emergency & Senior Triage**: Front-desk receptionist has granular controls to prioritize emergency or elderly patients without disrupting the appointment schedule.
 4. **Quantified Pilot Results**: Week 11–12 pilot data demonstrates a **73% reduction in patient waiting room times** (from 52 minutes down to 14 minutes), providing concrete empirical results for your project thesis.
+

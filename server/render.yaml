@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: apollo-care-backend
+    name: mediq-backend
     env: node
     plan: free
     buildCommand: npm install

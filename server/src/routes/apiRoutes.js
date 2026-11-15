@@ -5,6 +5,7 @@ import * as docCtrl from '../controllers/doctorController.js';
 import * as aptCtrl from '../controllers/appointmentController.js';
 import * as queueCtrl from '../controllers/queueController.js';
 import * as analyticsCtrl from '../controllers/analyticsController.js';
+import * as patientCtrl from '../controllers/patientController.js';
 
 const router = express.Router();
 
@@ -33,10 +34,12 @@ router.patch('/doctors/:id/toggle', docCtrl.toggleDoctorAvailability);
 router.get('/appointments', aptCtrl.getAppointments);
 router.post('/appointments', aptCtrl.createAppointment);
 router.post('/appointments/:id/check-in', aptCtrl.checkInAppointment);
+router.patch('/appointments/:id/reschedule', aptCtrl.rescheduleAppointment);
 router.delete('/appointments/:id', aptCtrl.cancelAppointment);
 
 // Queue Engine
 router.get('/queue', queueCtrl.getQueueTokens);
+router.get('/queue/summary', queueCtrl.getQueueSummary);
 router.post('/queue/walk-in', queueCtrl.createWalkInToken);
 router.post('/queue/call-next', queueCtrl.callNextToken);
 router.post('/queue/recall', queueCtrl.recallToken);
@@ -44,6 +47,11 @@ router.post('/queue/complete', queueCtrl.completeToken);
 router.post('/queue/no-show', queueCtrl.markNoShow);
 router.post('/queue/priority', queueCtrl.reorderPriority);
 router.get('/queue/token/:identifier', queueCtrl.getTokenStatus);
+
+// Patient EHR & Medical Records
+router.get('/patients/:phone/history', patientCtrl.getPatientHistory);
+router.get('/prescriptions/:id', patientCtrl.getPrescriptionById);
+router.get('/prescriptions/token/:identifier', patientCtrl.getPrescriptionByToken);
 
 // Analytics & Reports
 router.get('/analytics', analyticsCtrl.getAnalytics);

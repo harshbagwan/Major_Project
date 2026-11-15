@@ -172,6 +172,9 @@ export const completeToken = (req, res) => {
     tokenId: token.id,
     doctorId: token.doctorId,
     patientName: token.patientName,
+    patientPhone: token.patientPhone,
+    patientAge: token.patientAge,
+    patientGender: token.patientGender,
     diagnosis: diagnosis || 'Routine Checkup Completed',
     prescription: prescription || '',
     vitals: vitals || {},
@@ -240,11 +243,19 @@ export const reorderPriority = (req, res) => {
 
 // Public Patient Live Queue Tracker Endpoint
 export const getTokenStatus = (req, res) => {
-  const { identifier } = req.params; // Can be tokenNumber or displayToken (e.g. 104 or T-104)
-  const token = db.getQueueTokenById(identifier);
+  const { identifier } = req.params; // Can be tokenNumber, displayToken, or phone number
+  let token = db.getQueueTokenById(identifier);
 
   if (!token) {
-    return res.status(404).json({ error: 'Token not found or expired. Please check your token number.' });
+    // Try finding by patient phone number
+    const tokensByPhone = db.getQueueTokens({ patientPhone: identifier });
+    if (tokensByPhone && tokensByPhone.length > 0) {
+      token = tokensByPhone[0];
+    }
+  }
+
+  if (!token) {
+    return res.status(404).json({ error: 'Token not found or expired. Please check your token number or phone number.' });
   }
 
   const doctor = db.getDoctorById(token.doctorId);
@@ -299,5 +310,37 @@ export const getTokenStatus = (req, res) => {
     tokensAhead,
     estimatedWaitMins,
     statusText
+  });
+};
+
+export const getQueueSummary = (req, res) => {
+  const doctors = db.getDoctors();
+  const allTokens = db.getQueueTokens();
+
+  const summary = doctors.map(doc => {
+    const docTokens = allTokens.filter(t => t.doctorId === doc.id);
+    const waiting = docTokens.filter(t => t.status === 'waiting');
+    const serving = docTokens.find(t => t.status === 'serving' || t.status === 'called');
+    const completed = docTokens.filter(t => t.status === 'completed');
+
+    return {
+      doctorId: doc.id,
+      doctorName: doc.name,
+      specialization: doc.specialization,
+      roomNumber: doc.roomNumber,
+      isAvailable: doc.isAvailable,
+      waitingCount: waiting.length,
+      servingToken: serving ? serving.displayToken : 'None',
+      servingPatient: serving ? serving.patientName : null,
+      completedCount: completed.length,
+      estimatedWaitMinutes: waiting.length * 12
+    };
+  });
+
+  res.json({
+    summary,
+    totalWaiting: allTokens.filter(t => t.status === 'waiting').length,
+    totalServing: allTokens.filter(t => t.status === 'serving' || t.status === 'called').length,
+    totalCompleted: allTokens.filter(t => t.status === 'completed').length
   });
 };

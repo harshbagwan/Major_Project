@@ -2,7 +2,7 @@ const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const API_BASE = `${BACKEND_URL}/api`;
 
 async function request(endpoint, options = {}) {
-  const token = localStorage.getItem('apollo_auth_token');
+  const token = localStorage.getItem('mediq_auth_token');
   const headers = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -45,6 +45,10 @@ export const api = {
   checkInAppointment: (appointmentId) => request(`/appointments/${appointmentId}/check-in`, {
     method: 'POST'
   }),
+  rescheduleAppointment: (appointmentId, payload) => request(`/appointments/${appointmentId}/reschedule`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  }),
   cancelAppointment: (id) => request(`/appointments/${id}`, {
     method: 'DELETE'
   }),
@@ -54,6 +58,7 @@ export const api = {
     const query = new URLSearchParams(params).toString();
     return request(`/queue${query ? `?${query}` : ''}`);
   },
+  getQueueSummary: () => request('/queue/summary'),
   createWalkInToken: (payload) => request('/queue/walk-in', {
     method: 'POST',
     body: JSON.stringify(payload)
@@ -79,6 +84,11 @@ export const api = {
     body: JSON.stringify(payload)
   }),
   getTokenStatus: (identifier) => request(`/queue/token/${identifier}`),
+
+  // Patient EHR & Medical Prescriptions
+  getPatientHistory: (phone) => request(`/patients/${encodeURIComponent(phone)}/history`),
+  getPrescriptionByToken: (identifier) => request(`/prescriptions/token/${encodeURIComponent(identifier)}`),
+  getPrescriptionById: (id) => request(`/prescriptions/${id}`),
 
   // Analytics & Reports
   getAnalytics: () => request('/analytics'),

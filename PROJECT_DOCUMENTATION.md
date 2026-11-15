@@ -1,4 +1,4 @@
-# 📖 Apollo Care: Complete Technical Architecture & System Documentation
+# 📖 MediQ: Complete Technical Architecture & System Documentation
 > **Hospital Appointment & Real-Time Queue Management System**  
 > *Major Academic Project & Clinical Pilot Technical Reference*
 
@@ -32,8 +32,8 @@ In most private clinics and hospital Outpatient Departments (OPD):
 - **Walk-in vs. Appointment Friction:** Receptionists struggle to balance pre-booked appointments with urgent walk-in patients manually using pen-and-paper registers.
 - **High Friction Mobile Apps:** Existing hospital apps require 50MB native mobile app downloads, account creation, and passwords, which elderly and casual patients rarely install.
 
-### The Apollo Care Solution
-Apollo Care is a **zero-friction, web-based, real-time synchronization platform**:
+### The MediQ Solution
+MediQ is a **zero-friction, web-based, real-time synchronization platform**:
 1. **No App Download Required:** Patients book via mobile web, receive automated SMS/WhatsApp links, and track their queue live on their phones.
 2. **Sub-Second Synchronization:** When a doctor clicks *"Call Next Patient"*, the waiting room TV chimes and speaks the token, the patient's phone updates its countdown, and the receptionist desk updates simultaneously via WebSockets.
 3. **Smart Triage:** Front desk can triage Emergency or Senior Citizen patients to the top of the queue with one click.
@@ -259,7 +259,7 @@ Located in [AnalyticsReportPage.jsx](file:///d:/Major%20Project/client/src/pages
   - Average consultation duration (mins).
 - **Pilot Impact Metrics:**
   - Traditional Manual Wait: **52 minutes** (baseline from clinic observations).
-  - Apollo Care Smart Queue: **~12–14 minutes**.
+  - MediQ Smart Queue: **~12–14 minutes**.
   - **73% Reduction in Wait Time** (saves 38 minutes per patient).
   - **74% Reduction in Waiting Room Overcrowding**.
   - **4.8 / 5.0 Patient Satisfaction Score**.
@@ -433,4 +433,5 @@ When presenting this project for your academic viva, examiners often ask targete
 > **Answer:** *"Instead of relying on external MP3 audio files that frequently fail due to CORS, ad blockers, or broken CDNs, we implemented a dual-frequency synthesizer using the HTML5 Web Audio API. It generates a resonant two-tone chord (587Hz D5 followed by 880Hz A5) directly on the browser's audio hardware, combined with the browser's native SpeechSynthesis engine for spoken announcements."*
 
 ### Q5: "What are your measurable pilot results?"
-> **Answer:** *"Over our 2-day on-site clinic pilot, we measured baseline traditional waiting room times of 52 minutes. With Apollo Care's live tracking and arrival check-ins, the average physical waiting time in the clinic dropped to 14 minutes — a 73% reduction in wait time and a 74% reduction in lobby congestion, resulting in a 4.8 out of 5.0 patient satisfaction rating."*
+> **Answer:** *"Over our 2-day on-site clinic pilot, we measured baseline traditional waiting room times of 52 minutes. With MediQ's live tracking and arrival check-ins, the average physical waiting time in the clinic dropped to 14 minutes — a 73% reduction in wait time and a 74% reduction in lobby congestion, resulting in a 4.8 out of 5.0 patient satisfaction rating."*
+

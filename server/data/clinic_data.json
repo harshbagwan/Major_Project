@@ -1,11 +1,11 @@
 {
   "clinic": {
     "id": "clinic-1",
-    "name": "Apollo Care Health Clinic & OPD Centre",
+    "name": "MediQ Health Clinic & OPD Centre",
     "tagline": "Smart Healthcare & Real-Time Queue Management",
     "address": "42, Health City Avenue, Sector 5, Medical District",
     "phone": "+91 98765 43210",
-    "email": "helpdesk@apollocare.in",
+    "email": "helpdesk@mediq.health",
     "openTime": "08:00 AM",
     "closeTime": "08:00 PM",
     "activeNotice": "Please maintain physical queue distance. Emergency cases are prioritized."
@@ -451,7 +451,7 @@
       "recipientPhone": "+91 8641098003",
       "channel": "SMS",
       "messageType": "BOOKING_CONFIRMED",
-      "content": "Apollo Care: Appointment confirmed with Dr. Rajesh Sharma on 2026-09-18 at 10:00 AM. Ref: APT-0008"
+      "content": "MediQ: Appointment confirmed with Dr. Rajesh Sharma on 2026-09-18 at 10:00 AM. Ref: APT-0008"
     },
     {
       "id": "notif-1789747363849-420",
@@ -460,7 +460,7 @@
       "recipientPhone": "+91 8641098003",
       "channel": "WHATSAPP",
       "messageType": "BOOKING_CONFIRMED",
-      "content": "🏥 *Apollo Care Clinic*: Hello yoshi, your appointment with Dr. Rajesh Sharma (Cardiology) is confirmed for 2026-09-18 at 10:00 AM. Booking ID: APT-0008. Please arrive 10 mins early."
+      "content": "🏥 *MediQ Clinic*: Hello yoshi, your appointment with Dr. Rajesh Sharma (Cardiology) is confirmed for 2026-09-18 at 10:00 AM. Booking ID: APT-0008. Please arrive 10 mins early."
     },
     {
       "id": "notif-1789747085001-53",
@@ -469,7 +469,7 @@
       "recipientPhone": "+91 98877 12345",
       "channel": "SMS",
       "messageType": "QUEUE_ALERT",
-      "content": "Apollo Care: You are 2 token(s) away from Dr. Rajesh Sharma. Proceed to Room 101 (Floor 1)."
+      "content": "MediQ: You are 2 token(s) away from Dr. Rajesh Sharma. Proceed to Room 101 (Floor 1)."
     },
     {
       "id": "notif-1789747085000-457",
@@ -478,7 +478,7 @@
       "recipientPhone": "+91 98877 12345",
       "channel": "WHATSAPP",
       "messageType": "QUEUE_ALERT",
-      "content": "🔔 *Apollo Care Queue Alert*: Dear Vikram Choudhary, you are now *2* token(s) away from your consultation with Dr. Rajesh Sharma. Please stay near Room 101 (Floor 1)."
+      "content": "🔔 *MediQ Queue Alert*: Dear Vikram Choudhary, you are now *2* token(s) away from your consultation with Dr. Rajesh Sharma. Please stay near Room 101 (Floor 1)."
     },
     {
       "id": "notif-1789747085000-980",
@@ -487,7 +487,7 @@
       "recipientPhone": "+91 99456 88990",
       "channel": "SMS",
       "messageType": "QUEUE_ALERT",
-      "content": "Apollo Care: You are 1 token(s) away from Dr. Rajesh Sharma. Proceed to Room 101 (Floor 1)."
+      "content": "MediQ: You are 1 token(s) away from Dr. Rajesh Sharma. Proceed to Room 101 (Floor 1)."
     },
     {
       "id": "notif-1789747084999-346",
@@ -496,7 +496,7 @@
       "recipientPhone": "+91 99456 88990",
       "channel": "WHATSAPP",
       "messageType": "QUEUE_ALERT",
-      "content": "🔔 *Apollo Care Queue Alert*: Dear Neha Gupta, you are now *1* token(s) away from your consultation with Dr. Rajesh Sharma. Please stay near Room 101 (Floor 1)."
+      "content": "🔔 *MediQ Queue Alert*: Dear Neha Gupta, you are now *1* token(s) away from your consultation with Dr. Rajesh Sharma. Please stay near Room 101 (Floor 1)."
     },
     {
       "id": "notif-1789747084998-49",
@@ -505,7 +505,7 @@
       "recipientPhone": "+91 99123 77889",
       "channel": "SMS",
       "messageType": "TOKEN_CALLED",
-      "content": "Apollo Care: Token T-104 called! Please enter Room 101 (Floor 1) now."
+      "content": "MediQ: Token T-104 called! Please enter Room 101 (Floor 1) now."
     },
     {
       "id": "notif-1789747084997-840",
@@ -523,7 +523,7 @@
       "recipientPhone": "+91 98765 12345",
       "channel": "WHATSAPP",
       "messageType": "TOKEN_GENERATED",
-      "content": "🎫 *Apollo Care Clinic*: Token Generated! Your Token is *A-110* for Dr. Rajesh Sharma, Room 101 (Floor 1). Track your real-time queue position on your phone here: http://localhost:5173/track/110"
+      "content": "🎫 *MediQ Clinic*: Token Generated! Your Token is *A-110* for Dr. Rajesh Sharma, Room 101 (Floor 1). Track your real-time queue position on your phone here: http://localhost:5173/track/110"
     },
     {
       "id": "notif-1789747084962-542",
@@ -532,7 +532,7 @@
       "recipientPhone": "+91 98765 12345",
       "channel": "SMS",
       "messageType": "BOOKING_CONFIRMED",
-      "content": "Apollo Care: Appointment confirmed with Dr. Rajesh Sharma on 2026-09-18 at 11:00 AM. Ref: APT-0007"
+      "content": "MediQ: Appointment confirmed with Dr. Rajesh Sharma on 2026-09-18 at 11:00 AM. Ref: APT-0007"
     },
     {
       "id": "notif-1789747084959-910",
@@ -541,7 +541,7 @@
       "recipientPhone": "+91 98765 12345",
       "channel": "WHATSAPP",
       "messageType": "BOOKING_CONFIRMED",
-      "content": "🏥 *Apollo Care Clinic*: Hello Vikram Malhotra, your appointment with Dr. Rajesh Sharma (Cardiology) is confirmed for 2026-09-18 at 11:00 AM. Booking ID: APT-0007. Please arrive 10 mins early."
+      "content": "🏥 *MediQ Clinic*: Hello Vikram Malhotra, your appointment with Dr. Rajesh Sharma (Cardiology) is confirmed for 2026-09-18 at 11:00 AM. Booking ID: APT-0007. Please arrive 10 mins early."
     }
   ]
 }

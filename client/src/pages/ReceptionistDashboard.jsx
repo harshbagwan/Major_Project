@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useSocket } from '../context/SocketContext';
 import { PrintTokenModal } from '../components/PrintTokenModal';
+import { RescheduleModal } from '../components/RescheduleModal';
+import { PatientHistoryModal } from '../components/PatientHistoryModal';
 import {
   Users,
   UserPlus,
@@ -16,7 +18,10 @@ import {
   Phone,
   Stethoscope,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Calendar,
+  XCircle,
+  History
 } from 'lucide-react';
 
 export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
@@ -26,20 +31,15 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('queue'); // 'queue', 'walkin', 'appointments'
 
-  // Fast Walk-in Form State
-  const [walkInData, setWalkInData] = useState({
-    patientName: '',
-    patientPhone: '',
-    patientAge: '',
-    patientGender: 'Male',
-    doctorId: '',
-    reason: '',
-    isEmergency: false,
-    isSenior: false
-  });
-
-  // Selected Token for Printing
+  // Modals
   const [printedToken, setPrintedToken] = useState(null);
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
+  const [selectedAptToReschedule, setSelectedAptToReschedule] = useState(null);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyPhone, setHistoryPhone] = useState('');
+  const [historyPatientName, setHistoryPatientName] = useState('');
+
+  // Fast Walk-in Form State
 
   const { queueTick } = useSocket();
 
@@ -114,6 +114,27 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
     }
   };
 
+  const handleCancelAppointment = async (aptId) => {
+    if (!confirm('Are you sure you want to cancel this appointment?')) return;
+    try {
+      await api.cancelAppointment(aptId);
+      loadData();
+    } catch (err) {
+      alert(err.message || 'Failed to cancel appointment');
+    }
+  };
+
+  const handleOpenReschedule = (apt) => {
+    setSelectedAptToReschedule(apt);
+    setRescheduleModalOpen(true);
+  };
+
+  const handleOpenPatientHistory = (phone, name) => {
+    setHistoryPhone(phone || '');
+    setHistoryPatientName(name || '');
+    setHistoryModalOpen(true);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
       {/* Header */}
@@ -162,6 +183,14 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
           >
             <CalendarCheck size={15} />
             <span>Today's Bookings ({appointments.length})</span>
+          </button>
+
+          <button
+            onClick={() => handleOpenPatientHistory('', '')}
+            className="flex items-center gap-1.5 py-2 px-3.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition border border-transparent hover:border-slate-700"
+          >
+            <History size={15} className="text-cyan-400" />
+            <span>EHR Lookup</span>
           </button>
         </div>
       </div>
@@ -520,7 +549,17 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
 
                         <td className="px-5 py-3.5">
                           <div className="font-bold text-white">{apt.patientName}</div>
-                          <div className="text-[11px] text-slate-400 font-mono">{apt.patientPhone}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-slate-400 font-mono">{apt.patientPhone}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenPatientHistory(apt.patientPhone, apt.patientName)}
+                              title="View Patient Past EHR History"
+                              className="text-cyan-400 hover:text-white transition"
+                            >
+                              <History size={12} />
+                            </button>
+                          </div>
                         </td>
 
                         <td className="px-5 py-3.5">
@@ -538,6 +577,8 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                               : isCompleted
                               ? 'bg-slate-800 text-slate-400'
+                              : apt.status === 'cancelled'
+                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                               : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                           }`}>
                             {apt.status}
@@ -549,13 +590,33 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
                             <span className="text-[11px] text-emerald-400 font-mono font-bold flex items-center justify-end gap-1">
                               <CheckCircle2 size={13} /> Token #{apt.displayToken || apt.tokenNumber}
                             </span>
+                          ) : isCompleted ? (
+                            <span className="text-[11px] text-slate-500 font-mono">Completed</span>
+                          ) : apt.status === 'cancelled' ? (
+                            <span className="text-[11px] text-rose-500 font-mono">Cancelled</span>
                           ) : (
-                            <button
-                              onClick={() => handleCheckInAppointment(apt.id)}
-                              className="py-1.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition shadow-md shadow-cyan-900/40"
-                            >
-                              Check-In Patient
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleCheckInAppointment(apt.id)}
+                                className="py-1 px-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition shadow-md shadow-cyan-900/40"
+                              >
+                                Check-In
+                              </button>
+                              <button
+                                onClick={() => handleOpenReschedule(apt)}
+                                title="Reschedule Appointment"
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white transition border border-slate-700"
+                              >
+                                <Calendar size={13} />
+                              </button>
+                              <button
+                                onClick={() => handleCancelAppointment(apt.id)}
+                                title="Cancel Appointment"
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950 text-rose-400 hover:text-rose-200 transition border border-slate-700 hover:border-rose-800"
+                              >
+                                <XCircle size={13} />
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -577,6 +638,22 @@ export const ReceptionistDashboard = ({ clinic, onNavigateToTracker }) => {
           onTrack={(tokNum) => onNavigateToTracker && onNavigateToTracker(tokNum)}
         />
       )}
+
+      {/* Reschedule Modal */}
+      <RescheduleModal
+        isOpen={rescheduleModalOpen}
+        onClose={() => setRescheduleModalOpen(false)}
+        appointment={selectedAptToReschedule}
+        onRescheduled={() => loadData()}
+      />
+
+      {/* Patient Past EHR History Modal */}
+      <PatientHistoryModal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+        phone={historyPhone}
+        patientName={historyPatientName}
+      />
     </div>
   );
 };

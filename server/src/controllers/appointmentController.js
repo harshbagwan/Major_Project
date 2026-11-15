@@ -108,3 +108,34 @@ export const cancelAppointment = (req, res) => {
 
   res.json({ message: 'Appointment cancelled', appointment: updated });
 };
+
+export const rescheduleAppointment = (req, res) => {
+  const { appointmentDate, slotTime } = req.body;
+  if (!appointmentDate || !slotTime) {
+    return res.status(400).json({ error: 'New appointment date and slot time are required' });
+  }
+
+  const apt = db.getAppointmentById(req.params.id);
+  if (!apt) return res.status(404).json({ error: 'Appointment not found' });
+
+  if (apt.status === 'checked_in' || apt.status === 'completed') {
+    return res.status(400).json({ error: `Cannot reschedule appointment in '${apt.status}' state` });
+  }
+
+  const updated = db.updateAppointment(apt.id, {
+    appointmentDate,
+    slotTime,
+    status: 'booked'
+  });
+
+  const doctor = db.getDoctorById(updated.doctorId);
+  if (doctor) {
+    notificationService.notifyBookingConfirmed(updated, doctor);
+  }
+
+  if (req.app.get('io')) {
+    req.app.get('io').emit('APPOINTMENT_RESCHEDULED', updated);
+  }
+
+  res.json({ message: 'Appointment rescheduled successfully!', appointment: updated });
+};

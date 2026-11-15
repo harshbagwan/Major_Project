@@ -69,7 +69,7 @@ export const WaitingRoomTVPage = ({ clinic }) => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">
-                {clinic?.name || 'Apollo Care Health Clinic'}
+                {clinic?.name || 'MediQ Health Clinic'}
               </h1>
               <span className="bg-rose-500/20 text-rose-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-500/30 uppercase tracking-widest flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping inline-block" /> Live Display
@@ -233,7 +233,7 @@ export const WaitingRoomTVPage = ({ clinic }) => {
           ANNOUNCEMENT
         </span>
         <marquee className="font-medium text-slate-200">
-          {clinic?.activeNotice || 'Welcome to Apollo Care Health Clinic. Please have your token slip or digital phone pass ready. Free Wi-Fi is available in the waiting lobby. Emergency cases are prioritized.'}
+          {clinic?.activeNotice || 'Welcome to MediQ Health Clinic. Please have your token slip or digital phone pass ready. Free Wi-Fi is available in the waiting lobby. Emergency cases are prioritized.'}
         </marquee>
       </div>
     </div>

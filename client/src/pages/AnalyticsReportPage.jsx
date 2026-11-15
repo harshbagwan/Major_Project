@@ -222,7 +222,7 @@ export const AnalyticsReportPage = () => {
               Clinic Pilot Results: Before vs. After
             </h2>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Comparison between traditional manual walk-in queuing vs. Apollo Care real-time token tracking over a 2-day on-site pilot.
+              Comparison between traditional manual walk-in queuing vs. MediQ real-time token tracking over a 2-day on-site pilot.
             </p>
           </div>
 

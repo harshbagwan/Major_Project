@@ -5,18 +5,18 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('apollo_user');
+    const saved = localStorage.getItem('mediq_user');
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem('apollo_auth_token'));
+  const [token, setToken] = useState(() => localStorage.getItem('mediq_auth_token'));
 
   const loginWithCredentials = async (email, password) => {
     const data = await api.login({ email, password });
     setUser(data.user);
     setToken(data.token);
-    localStorage.setItem('apollo_auth_token', data.token);
-    localStorage.setItem('apollo_user', JSON.stringify(data.user));
+    localStorage.setItem('mediq_auth_token', data.token);
+    localStorage.setItem('mediq_user', JSON.stringify(data.user));
     return data.user;
   };
 
@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('apollo_auth_token');
-    localStorage.removeItem('apollo_user');
+    localStorage.removeItem('mediq_auth_token');
+    localStorage.removeItem('mediq_user');
   };
 
   return (

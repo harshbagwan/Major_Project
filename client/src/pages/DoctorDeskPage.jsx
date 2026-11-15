@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
+import { MedicalPrescriptionModal } from '../components/MedicalPrescriptionModal';
+import { PatientHistoryModal } from '../components/PatientHistoryModal';
 import {
   Stethoscope,
   Volume2,
@@ -16,7 +18,9 @@ import {
   AlertTriangle,
   RefreshCw,
   Flame,
-  Check
+  Check,
+  History,
+  Printer
 } from 'lucide-react';
 
 export const DoctorDeskPage = () => {
@@ -26,8 +30,18 @@ export const DoctorDeskPage = () => {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState('doc-1');
   const [queueTokens, setQueueTokens] = useState([]);
+  const [clinic, setClinic] = useState(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Modals
+  const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [selectedPrescriptionToken, setSelectedPrescriptionToken] = useState(null);
+
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyPhone, setHistoryPhone] = useState('');
+  const [historyPatientName, setHistoryPatientName] = useState('');
 
   // Clinical Notes & Rx State
   const [clinicalNotes, setClinicalNotes] = useState({
@@ -44,7 +58,17 @@ export const DoctorDeskPage = () => {
 
   useEffect(() => {
     loadDoctors();
+    loadClinic();
   }, []);
+
+  const loadClinic = async () => {
+    try {
+      const data = await api.getClinic();
+      setClinic(data.clinic);
+    } catch (err) {
+      console.error('Failed to load clinic:', err);
+    }
+  };
 
   useEffect(() => {
     if (selectedDoctorId) {
@@ -122,7 +146,7 @@ export const DoctorDeskPage = () => {
     if (!servingToken) return;
     try {
       setActionLoading(true);
-      await api.completeToken({
+      const res = await api.completeToken({
         tokenId: servingToken.id,
         diagnosis: clinicalNotes.diagnosis || 'Routine Checkup Completed',
         prescription: clinicalNotes.prescription,
@@ -145,11 +169,35 @@ export const DoctorDeskPage = () => {
         notes: '',
         followUpDate: ''
       });
+
+      // Automatically open official prescription modal for review / printing
+      if (res.consultation) {
+        setSelectedPrescription(res.consultation);
+        setSelectedPrescriptionToken(res.token);
+        setPrescriptionModalOpen(true);
+      }
     } catch (err) {
       alert(err.message || 'Failed to complete consultation');
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleViewPrescriptionForToken = async (tok) => {
+    try {
+      const res = await api.getPrescriptionByToken(tok.id);
+      setSelectedPrescription(res.consultation);
+      setSelectedPrescriptionToken(res.token);
+      setPrescriptionModalOpen(true);
+    } catch (err) {
+      alert(err.message || 'Prescription not found');
+    }
+  };
+
+  const handleOpenPatientHistory = (phone, name) => {
+    setHistoryPhone(phone || '');
+    setHistoryPatientName(name || '');
+    setHistoryModalOpen(true);
   };
 
   const handleMarkNoShow = async () => {
@@ -232,8 +280,15 @@ export const DoctorDeskPage = () => {
                     <h2 className="text-xl font-bold text-white mt-1">
                       {servingToken.patientName}
                     </h2>
-                    <p className="text-xs text-slate-400 font-mono mt-0.5">
-                      Phone: {servingToken.patientPhone} • {servingToken.patientAge || 'N/A'} yrs • {servingToken.patientGender}
+                    <p className="text-xs text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-2">
+                      <span>Phone: {servingToken.patientPhone} • {servingToken.patientAge || 'N/A'} yrs • {servingToken.patientGender}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPatientHistory(servingToken.patientPhone, servingToken.patientName)}
+                        className="py-0.5 px-2 bg-cyan-950/80 hover:bg-cyan-700 text-cyan-400 hover:text-white border border-cyan-800/60 rounded text-[10px] font-bold flex items-center gap-1 transition"
+                      >
+                        <History size={11} /> EHR History
+                      </button>
                     </p>
                   </div>
 
@@ -481,14 +536,22 @@ export const DoctorDeskPage = () => {
                 <p className="text-xs text-slate-500 italic">No consultations finished today yet.</p>
               ) : (
                 completedTokens.map(tok => (
-                  <div key={tok.id} className="text-xs p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+                  <div key={tok.id} className="text-xs p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2">
                     <div>
                       <span className="font-mono font-bold text-slate-300 mr-2">{tok.displayToken}</span>
                       <span className="text-slate-200 font-medium">{tok.patientName}</span>
                     </div>
-                    <span className="text-[11px] font-mono text-emerald-400">
-                      ✓ Done ({tok.serviceTimeMinutes || 8}m)
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewPrescriptionForToken(tok)}
+                        className="py-1 px-2 bg-cyan-950/80 hover:bg-cyan-700 text-cyan-400 hover:text-white rounded border border-cyan-800/60 text-[10px] font-bold flex items-center gap-1 transition"
+                      >
+                        <FileText size={10} /> Rx Slip
+                      </button>
+                      <span className="text-[10px] font-mono text-emerald-400">
+                        ✓ Done
+                      </span>
+                    </div>
                   </div>
                 ))
               )}
@@ -496,6 +559,29 @@ export const DoctorDeskPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Digital Medical Prescription Modal */}
+      <MedicalPrescriptionModal
+        isOpen={prescriptionModalOpen}
+        onClose={() => setPrescriptionModalOpen(false)}
+        consultation={selectedPrescription}
+        doctor={currentDoctor}
+        clinic={clinic}
+        token={selectedPrescriptionToken}
+      />
+
+      {/* Patient Past EHR History Modal */}
+      <PatientHistoryModal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+        phone={historyPhone}
+        patientName={historyPatientName}
+        onViewPrescription={(c) => {
+          setSelectedPrescription(c);
+          setSelectedPrescriptionToken({ patientPhone: c.patientPhone, displayToken: c.tokenId });
+          setPrescriptionModalOpen(true);
+        }}
+      />
     </div>
   );
 };

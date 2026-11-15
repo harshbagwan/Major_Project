@@ -97,7 +97,7 @@ function MainApp() {
         <footer className="border-t border-slate-900 bg-slate-950/60 py-6 text-center text-xs text-slate-500">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p>
-              🏥 <strong>Apollo Care</strong> • Hospital Appointment & Queue Management System
+              🏥 <strong>MediQ</strong> • Hospital Appointment & Real-Time OPD Queue Management System
             </p>
             <p className="font-mono text-[11px] text-slate-400">
               12-Week Solo Build Plan • Major Academic Project & Clinic Pilot

@@ -1,4 +1,4 @@
-# 🚀 Complete Cloud Deployment Guide: Apollo Care
+# 🚀 Complete Cloud Deployment Guide: MediQ
 > **Target Stack:** GitHub + Vercel (Frontend) + Render / Railway (Backend) + Supabase (PostgreSQL)
 
 Your local repository is already initialized and all 55 project files are committed. Follow these 3 simple steps to take your system live on the internet for free with zero DevOps overhead.
@@ -33,7 +33,7 @@ Render hosts your Node.js + Socket.io backend server for free with native WebSoc
 2. Click **New +** → **Web Service**.
 3. Select **Build and deploy from a Git repository** and connect your `hospital-queue-management` repo.
 4. Fill in the settings:
-   - **Name:** `apollo-care-backend`
+   - **Name:** `mediq-backend`
    - **Region:** Choose the closest region (e.g. *Singapore* or *Frankfurt*)
    - **Root Directory:** `server`
    - **Runtime:** `Node`
@@ -46,7 +46,7 @@ Render hosts your Node.js + Socket.io backend server for free with native WebSoc
    - `PORT` = `10000`
 6. Click **"Deploy Web Service"**.
 7. Once deployed, Render will provide your public backend URL, for example:
-   `https://apollo-care-backend.onrender.com`
+   `https://mediq-backend.onrender.com`
 
 ---
 
@@ -62,7 +62,7 @@ Vercel provides lightning-fast global CDN hosting for your Vite + React applicat
    - **Root Directory:** Click *Edit* and select **`client`**.
 5. Expand **Environment Variables** and add:
    - **Key:** `VITE_API_URL`
-   - **Value:** Your Render backend URL from Step 2 (e.g. `https://apollo-care-backend.onrender.com` — *do not add trailing slash*).
+   - **Value:** Your Render backend URL from Step 2 (e.g. `https://mediq-backend.onrender.com` — *do not add trailing slash*).
 6. Click **Deploy**.
 7. Within 60 seconds, Vercel will give you your live production URL:
    `https://hospital-queue-management.vercel.app`
@@ -91,3 +91,4 @@ Once deployed:
 3. Open your Vercel URL in another tab:
    - Switch to **"Doctor OPD Desk"** and click **"Call Next Patient"**.
    - Notice the Waiting Room TV chimes and displays the new token with sub-second real-time sync across the globe!
+
