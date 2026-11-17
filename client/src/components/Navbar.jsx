@@ -54,7 +54,7 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
       <div className="bg-gradient-to-r from-cyan-950/70 via-slate-900 to-indigo-950/70 py-1 px-4 text-center border-b border-white/5 text-[11px] text-slate-300 flex items-center justify-between">
         <div className="flex items-center gap-2 mx-auto">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-          <span className="font-semibold text-cyan-300">12-Week Pilot Architecture</span>
+          <span className="font-semibold text-cyan-300">Live OPD Queue Active</span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-300 truncate max-w-lg">{clinic?.activeNotice || 'OPD Queue Active. Emergency and Senior patients are prioritized.'}</span>
         </div>

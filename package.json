@@ -1,7 +1,7 @@
 {
-  "name": "hospital-appointment-and-queue-management-system",
+  "name": "mediq-hospital-queue-management-system",
   "version": "1.0.0",
-  "description": "Hospital Appointment & Real-Time Queue Management System - 12-Week Solo Build Plan Major Project",
+  "description": "MediQ - Hospital Appointment & Real-Time OPD Queue Management System Major Academic Project",
   "scripts": {
     "server": "npm --prefix server start",
     "client": "npm --prefix client dev",
