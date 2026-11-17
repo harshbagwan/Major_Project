@@ -194,7 +194,7 @@ To demonstrate real-time WebSocket synchronization and RBAC isolation during a c
 
 ---
 
-## 🎓 College Project Presentation & Viva Guide
+## 🎓 College Project Presentation & Viva Guide - for yoshi
 
 ### 1. The 30-Second Elevator Pitch
 > *"MediQ is a production-grade hospital OPD appointment and real-time queue management system built with React, Node.js, Socket.io, and SQLite3 (WAL Mode). It enforces strict 4-role RBAC isolating Doctor, Receptionist, Patient, and Admin workspaces while synchronizing patient mobile trackers, front-desk triage consoles, doctor consultation rooms, live online presence, and waiting room TV audio displays in sub-second time over WebSockets — reducing clinic waiting times by 73%."*
