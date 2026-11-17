@@ -393,13 +393,16 @@ class SQLiteDatabase {
     if (clinicCount === 0) {
       this.resetToDefault();
     } else {
-      // Ensure any newly added default accounts (admin, sample patient) exist
+      // Ensure any newly added default accounts (admin, sample patient) exist and have phone numbers
       const insertUser = this.sqlite.prepare(`
         INSERT OR IGNORE INTO users (id, name, email, phone, password, role, doctorId, avatar)
         VALUES (@id, @name, @email, @phone, @password, @role, @doctorId, @avatar)
       `);
+      const updatePhone = this.sqlite.prepare(`
+        UPDATE users SET phone = @phone WHERE id = @id AND (phone IS NULL OR phone = '')
+      `);
       for (const u of defaultState.users) {
-        insertUser.run({
+        const payload = {
           id: u.id,
           name: u.name,
           email: u.email,
@@ -408,7 +411,11 @@ class SQLiteDatabase {
           role: u.role,
           doctorId: u.doctorId || null,
           avatar: u.avatar || '🧑'
-        });
+        };
+        insertUser.run(payload);
+        if (payload.phone) {
+          updatePhone.run({ id: payload.id, phone: payload.phone });
+        }
       }
     }
   }
@@ -438,11 +445,20 @@ class SQLiteDatabase {
       }
 
       const insertUser = this.sqlite.prepare(`
-        INSERT INTO users (id, name, email, password, role, doctorId, avatar)
-        VALUES (@id, @name, @email, @password, @role, @doctorId, @avatar)
+        INSERT INTO users (id, name, email, phone, password, role, doctorId, avatar)
+        VALUES (@id, @name, @email, @phone, @password, @role, @doctorId, @avatar)
       `);
       for (const u of defaultState.users) {
-        insertUser.run(u);
+        insertUser.run({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone || '',
+          password: u.password,
+          role: u.role,
+          doctorId: u.doctorId || null,
+          avatar: u.avatar || '🧑'
+        });
       }
 
       if (fs.existsSync(DATA_FILE)) {
@@ -625,6 +641,24 @@ class SQLiteDatabase {
     return newApt;
   }
 
+  updateAppointment(id, updates) {
+    const current = this.getAppointmentById(id);
+    if (!current) return null;
+
+    const updated = { ...current, ...updates };
+    this.sqlite.prepare(`
+      UPDATE appointments
+      SET patientName = @patientName, patientPhone = @patientPhone, patientAge = @patientAge,
+          patientGender = @patientGender, doctorId = @doctorId, doctorName = @doctorName,
+          specialization = @specialization, roomNumber = @roomNumber,
+          appointmentDate = @appointmentDate, slotTime = @slotTime, reason = @reason,
+          status = @status, tokenNumber = @tokenNumber, displayToken = @displayToken
+      WHERE id = @id
+    `).run(updated);
+
+    return updated;
+  }
+
   rescheduleAppointment(appointmentId, payload) {
     const apt = this.getAppointmentById(appointmentId);
     if (!apt) return null;
@@ -683,7 +717,7 @@ class SQLiteDatabase {
   }
 
   // Queue Tokens
-  getQueue(filters = {}) {
+  getQueueTokens(filters = {}) {
     let query = 'SELECT * FROM queue_tokens WHERE 1=1';
     const params = [];
     if (filters.doctorId) {
@@ -691,56 +725,83 @@ class SQLiteDatabase {
       params.push(filters.doctorId);
     }
     if (filters.status) {
-      query += ' AND status = ?';
-      params.push(filters.status);
+      if (Array.isArray(filters.status)) {
+        const placeholders = filters.status.map(() => '?').join(',');
+        query += ` AND status IN (${placeholders})`;
+        params.push(...filters.status);
+      } else {
+        query += ' AND status = ?';
+        params.push(filters.status);
+      }
+    }
+    if (filters.patientPhone) {
+      const clean = String(filters.patientPhone).replace(/\D/g, '');
+      if (clean.length >= 6) {
+        query += ' AND (patientPhone LIKE ? OR REPLACE(REPLACE(REPLACE(patientPhone, " ", ""), "-", ""), "+", "") LIKE ?)';
+        params.push(`%${String(filters.patientPhone).trim()}%`, `%${clean.slice(-10)}%`);
+      } else {
+        query += ' AND patientPhone LIKE ?';
+        params.push(`%${String(filters.patientPhone).trim()}%`);
+      }
     }
     query += ' ORDER BY priorityLevel DESC, tokenNumber ASC';
     return this.sqlite.prepare(query).all(...params);
   }
 
-  getQueueTokenById(id) {
-    return this.sqlite.prepare('SELECT * FROM queue_tokens WHERE id = ?').get(id);
+  getQueue(filters = {}) {
+    return this.getQueueTokens(filters);
   }
 
-  createWalkInToken(tokenData) {
+  getQueueTokenById(id) {
+    if (!id) return null;
+    const str = String(id).trim();
+    const num = Number(str);
+    return this.sqlite.prepare(`
+      SELECT * FROM queue_tokens
+      WHERE id = ? OR displayToken = ? OR tokenNumber = ?
+      LIMIT 1
+    `).get(str, str, isNaN(num) ? -1 : num);
+  }
+
+  createQueueToken(tokenData) {
     const doc = this.getDoctorById(tokenData.doctorId);
-    if (!doc) throw new Error('Selected doctor not found');
+    const roomNumber = tokenData.roomNumber || (doc ? doc.roomNumber : 'Room 101');
 
     const maxTokenRow = this.sqlite.prepare('SELECT MAX(tokenNumber) as maxNum FROM queue_tokens').get();
-    const nextNum = (maxTokenRow && maxTokenRow.maxNum) ? maxTokenRow.maxNum + 1 : 101;
+    const nextNum = tokenData.tokenNumber || ((maxTokenRow && maxTokenRow.maxNum) ? maxTokenRow.maxNum + 1 : 101);
 
-    let priorityLevel = 1;
-    let tokenType = 'walk_in';
+    let priorityLevel = tokenData.priorityLevel || 1;
+    let tokenType = tokenData.tokenType || 'walk_in';
     if (tokenData.isEmergency) {
       priorityLevel = 3;
       tokenType = 'emergency';
     } else if (tokenData.isSenior) {
       priorityLevel = 2;
-    } else if (tokenData.appointmentId) {
+    } else if (tokenData.appointmentId && !tokenData.tokenType) {
       tokenType = 'appointment';
     }
 
     const newToken = {
-      id: `tok-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: tokenData.id || `tok-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       tokenNumber: nextNum,
-      displayToken: `${nextNum}`,
+      displayToken: tokenData.displayToken || `${nextNum}`,
       tokenType,
       patientName: tokenData.patientName,
-      patientPhone: tokenData.patientPhone,
+      patientPhone: tokenData.patientPhone || '',
       patientAge: tokenData.patientAge || null,
       patientGender: tokenData.patientGender || 'Other',
       reason: tokenData.reason || 'General Consultation',
       doctorId: tokenData.doctorId,
-      roomNumber: doc.roomNumber,
-      status: 'waiting',
+      roomNumber,
+      status: tokenData.status || 'waiting',
       priorityLevel,
       appointmentId: tokenData.appointmentId || null,
-      checkInTime: new Date().toISOString(),
-      calledTime: null,
-      completedTime: null,
-      waitTimeMinutes: 0,
-      serviceTimeMinutes: 0,
-      notes: ''
+      checkInTime: tokenData.checkInTime || new Date().toISOString(),
+      calledTime: tokenData.calledTime || null,
+      completedTime: tokenData.completedTime || null,
+      waitTimeMinutes: tokenData.waitTimeMinutes || 0,
+      serviceTimeMinutes: tokenData.serviceTimeMinutes || 0,
+      notes: tokenData.notes || ''
     };
 
     this.sqlite.prepare(`
@@ -748,8 +809,34 @@ class SQLiteDatabase {
       VALUES (@id, @tokenNumber, @displayToken, @tokenType, @patientName, @patientPhone, @patientAge, @patientGender, @reason, @doctorId, @roomNumber, @status, @priorityLevel, @appointmentId, @checkInTime, @calledTime, @completedTime, @waitTimeMinutes, @serviceTimeMinutes, @notes)
     `).run(newToken);
 
-    this.updateDoctor(doc.id, { todayQueueCount: (doc.todayQueueCount || 0) + 1 });
+    if (doc) {
+      this.updateDoctor(doc.id, { todayQueueCount: (doc.todayQueueCount || 0) + 1 });
+    }
     return newToken;
+  }
+
+  createWalkInToken(tokenData) {
+    return this.createQueueToken(tokenData);
+  }
+
+  updateQueueToken(id, updates) {
+    const current = this.getQueueTokenById(id);
+    if (!current) return null;
+
+    const updated = { ...current, ...updates };
+    this.sqlite.prepare(`
+      UPDATE queue_tokens
+      SET tokenNumber = @tokenNumber, displayToken = @displayToken, tokenType = @tokenType,
+          patientName = @patientName, patientPhone = @patientPhone, patientAge = @patientAge,
+          patientGender = @patientGender, reason = @reason, doctorId = @doctorId,
+          roomNumber = @roomNumber, status = @status, priorityLevel = @priorityLevel,
+          appointmentId = @appointmentId, checkInTime = @checkInTime, calledTime = @calledTime,
+          completedTime = @completedTime, waitTimeMinutes = @waitTimeMinutes,
+          serviceTimeMinutes = @serviceTimeMinutes, notes = @notes
+      WHERE id = @id
+    `).run(updated);
+
+    return updated;
   }
 
   callNextToken(doctorId, specificTokenId = null) {
@@ -1116,8 +1203,17 @@ class SQLiteDatabase {
 
   findUserByPhone(phone) {
     if (!phone) return null;
-    const clean = phone.replace(/\D/g, '');
-    return this.sqlite.prepare('SELECT * FROM users WHERE phone LIKE ? OR phone LIKE ?').get(`%${phone.trim()}%`, `%${clean}%`);
+    const raw = String(phone).trim();
+    const clean = raw.replace(/\D/g, '');
+    if (clean.length < 6) return null;
+    const last10 = clean.length >= 10 ? clean.slice(-10) : clean;
+    const users = this.sqlite.prepare('SELECT * FROM users WHERE phone IS NOT NULL AND phone != \'\'').all();
+    return users.find(u => {
+      const uClean = String(u.phone || '').replace(/\D/g, '');
+      if (uClean.length < 6) return false;
+      const uLast10 = uClean.length >= 10 ? uClean.slice(-10) : uClean;
+      return uClean === clean || uLast10 === last10;
+    }) || null;
   }
 
   findUserById(id) {
@@ -1291,6 +1387,14 @@ class JSONFileDatabase {
     return newApt;
   }
 
+  updateAppointment(id, updates) {
+    const idx = (this.data.appointments || []).findIndex(a => a.id === id);
+    if (idx === -1) return null;
+    this.data.appointments[idx] = { ...this.data.appointments[idx], ...updates };
+    this.save();
+    return this.data.appointments[idx];
+  }
+
   rescheduleAppointment(appointmentId, payload) {
     const apt = this.getAppointmentById(appointmentId);
     if (!apt) return null;
@@ -1335,13 +1439,25 @@ class JSONFileDatabase {
     return { appointment: apt, token };
   }
 
-  getQueue(filters = {}) {
+  getQueueTokens(filters = {}) {
     let result = [...(this.data.queue_tokens || [])];
     if (filters.doctorId) {
       result = result.filter(t => t.doctorId === filters.doctorId);
     }
     if (filters.status) {
-      result = result.filter(t => t.status === filters.status);
+      if (Array.isArray(filters.status)) {
+        result = result.filter(t => filters.status.includes(t.status));
+      } else {
+        result = result.filter(t => t.status === filters.status);
+      }
+    }
+    if (filters.patientPhone) {
+      const clean = String(filters.patientPhone).replace(/\D/g, '');
+      result = result.filter(t => {
+        if (!t.patientPhone) return false;
+        const pClean = String(t.patientPhone).replace(/\D/g, '');
+        return t.patientPhone.includes(filters.patientPhone.trim()) || (clean.length >= 6 && pClean.includes(clean.slice(-10)));
+      });
     }
     result.sort((a, b) => {
       if ((b.priorityLevel || 1) !== (a.priorityLevel || 1)) {
@@ -1352,57 +1468,80 @@ class JSONFileDatabase {
     return result;
   }
 
-  getQueueTokenById(id) {
-    return (this.data.queue_tokens || []).find(t => t.id === id) || null;
+  getQueue(filters = {}) {
+    return this.getQueueTokens(filters);
   }
 
-  createWalkInToken(tokenData) {
+  getQueueTokenById(id) {
+    if (!id) return null;
+    const str = String(id).trim();
+    const num = Number(str);
+    return (this.data.queue_tokens || []).find(t =>
+      t.id === str || t.displayToken === str || (!isNaN(num) && t.tokenNumber === num)
+    ) || null;
+  }
+
+  createQueueToken(tokenData) {
     const doc = this.getDoctorById(tokenData.doctorId);
-    if (!doc) throw new Error('Doctor not found');
+    const roomNumber = tokenData.roomNumber || (doc ? doc.roomNumber : 'Room 101');
 
     const tokens = this.data.queue_tokens || [];
     const maxNum = tokens.reduce((max, t) => (t.tokenNumber > max ? t.tokenNumber : max), 100);
-    const nextNum = maxNum + 1;
+    const nextNum = tokenData.tokenNumber || (maxNum + 1);
 
-    let priorityLevel = 1;
-    let tokenType = 'walk_in';
+    let priorityLevel = tokenData.priorityLevel || 1;
+    let tokenType = tokenData.tokenType || 'walk_in';
     if (tokenData.isEmergency) {
       priorityLevel = 3;
       tokenType = 'emergency';
     } else if (tokenData.isSenior) {
       priorityLevel = 2;
-    } else if (tokenData.appointmentId) {
+    } else if (tokenData.appointmentId && !tokenData.tokenType) {
       tokenType = 'appointment';
     }
 
     const newToken = {
-      id: `tok-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: tokenData.id || `tok-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       tokenNumber: nextNum,
-      displayToken: `${nextNum}`,
+      displayToken: tokenData.displayToken || `${nextNum}`,
       tokenType,
       patientName: tokenData.patientName,
-      patientPhone: tokenData.patientPhone,
+      patientPhone: tokenData.patientPhone || '',
       patientAge: tokenData.patientAge || null,
       patientGender: tokenData.patientGender || 'Other',
       reason: tokenData.reason || 'General Consultation',
       doctorId: tokenData.doctorId,
-      roomNumber: doc.roomNumber,
-      status: 'waiting',
+      roomNumber,
+      status: tokenData.status || 'waiting',
       priorityLevel,
       appointmentId: tokenData.appointmentId || null,
-      checkInTime: new Date().toISOString(),
-      calledTime: null,
-      completedTime: null,
-      waitTimeMinutes: 0,
-      serviceTimeMinutes: 0,
-      notes: ''
+      checkInTime: tokenData.checkInTime || new Date().toISOString(),
+      calledTime: tokenData.calledTime || null,
+      completedTime: tokenData.completedTime || null,
+      waitTimeMinutes: tokenData.waitTimeMinutes || 0,
+      serviceTimeMinutes: tokenData.serviceTimeMinutes || 0,
+      notes: tokenData.notes || ''
     };
 
     if (!this.data.queue_tokens) this.data.queue_tokens = [];
     this.data.queue_tokens.push(newToken);
-    this.updateDoctor(doc.id, { todayQueueCount: (doc.todayQueueCount || 0) + 1 });
+    if (doc) {
+      this.updateDoctor(doc.id, { todayQueueCount: (doc.todayQueueCount || 0) + 1 });
+    }
     this.save();
     return newToken;
+  }
+
+  createWalkInToken(tokenData) {
+    return this.createQueueToken(tokenData);
+  }
+
+  updateQueueToken(id, updates) {
+    const idx = (this.data.queue_tokens || []).findIndex(t => t.id === id);
+    if (idx === -1) return null;
+    this.data.queue_tokens[idx] = { ...this.data.queue_tokens[idx], ...updates };
+    this.save();
+    return this.data.queue_tokens[idx];
   }
 
   callNextToken(doctorId, specificTokenId = null) {
@@ -1712,11 +1851,15 @@ class JSONFileDatabase {
 
   findUserByPhone(phone) {
     if (!phone) return null;
-    const clean = phone.trim().replace(/\D/g, '');
+    const clean = String(phone).trim().replace(/\D/g, '');
+    if (clean.length < 6) return null;
+    const last10 = clean.length >= 10 ? clean.slice(-10) : clean;
     return (this.data.users || []).find(u => {
       if (!u.phone) return false;
-      const uClean = u.phone.replace(/\D/g, '');
-      return u.phone.includes(phone.trim()) || (clean.length >= 6 && uClean.includes(clean));
+      const uClean = String(u.phone).replace(/\D/g, '');
+      if (uClean.length < 6) return false;
+      const uLast10 = uClean.length >= 10 ? uClean.slice(-10) : uClean;
+      return uClean === clean || uLast10 === last10;
     }) || null;
   }
 

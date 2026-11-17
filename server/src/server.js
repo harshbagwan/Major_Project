@@ -101,9 +101,20 @@ io.on('connection', (socket) => {
 // Mount API routes
 app.use('/api', apiRoutes);
 
+// JSON 404 fallback for unknown API routes (prevents HTML <!DOCTYPE> responses)
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: `API route not found: ${req.method} ${req.originalUrl}` });
+});
+
+// Global JSON error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled server error:', err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  res.json({ status: 'healthy', version: '2.1-rbac', timestamp: new Date().toISOString() });
 });
 
 // Seed data check

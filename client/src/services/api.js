@@ -9,21 +9,41 @@ async function request(endpoint, options = {}) {
     ...options.headers
   };
 
+  let res;
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
+    res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,
       headers
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Server request failed');
-    }
-    return data;
-  } catch (err) {
-    console.error(`API Error [${endpoint}]:`, err);
-    throw err;
+  } catch (netErr) {
+    console.error(`Network Error [${endpoint}]:`, netErr);
+    throw new Error('Cannot connect to MediQ backend. Please ensure the backend server is running (port 5000).');
   }
+
+  const contentType = res.headers.get('content-type') || '';
+  let data;
+  if (contentType.includes('application/json')) {
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      throw new Error('Received an unparseable response from the server.');
+    }
+  } else {
+    const rawText = await res.text();
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw new Error(`API endpoint not found (404: ${endpoint}). Please restart your backend server to load the latest routes.`);
+      }
+      throw new Error(`Server returned status ${res.status}: ${rawText.slice(0, 100)}`);
+    }
+    data = { raw: rawText };
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `Request failed with status ${res.status}`);
+  }
+
+  return data;
 }
 
 export const api = {
