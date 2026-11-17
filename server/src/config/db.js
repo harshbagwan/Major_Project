@@ -74,9 +74,20 @@ const defaultState = {
   ],
   users: [
     {
+      id: 'usr-admin',
+      name: 'Dr. Vikram Malhotra (Administrator)',
+      email: 'admin@mediq.health',
+      phone: '+91 98765 00001',
+      password: 'adminpassword123',
+      role: 'admin',
+      avatar: '🛡️',
+      doctorId: null
+    },
+    {
       id: 'usr-1',
-      name: 'Sunita Sharma',
+      name: 'Sunita Sharma (Reception Desk)',
       email: 'receptionist@clinic.com',
+      phone: '+91 98765 00002',
       password: 'password123',
       role: 'receptionist',
       avatar: '👩‍💼',
@@ -86,6 +97,7 @@ const defaultState = {
       id: 'usr-2',
       name: 'Dr. Rajesh Sharma',
       email: 'doctor.sharma@clinic.com',
+      phone: '+91 98765 00003',
       password: 'password123',
       role: 'doctor',
       doctorId: 'doc-1',
@@ -95,6 +107,7 @@ const defaultState = {
       id: 'usr-3',
       name: 'Dr. Priya Patel',
       email: 'doctor.patel@clinic.com',
+      phone: '+91 98765 00004',
       password: 'password123',
       role: 'doctor',
       doctorId: 'doc-2',
@@ -104,10 +117,21 @@ const defaultState = {
       id: 'usr-4',
       name: 'Dr. Ananya Verma',
       email: 'doctor.ananya@clinic.com',
+      phone: '+91 98765 00005',
       password: 'password123',
       role: 'doctor',
       doctorId: 'doc-3',
       avatar: '👩‍⚕️'
+    },
+    {
+      id: 'usr-patient-1',
+      name: 'Rohan Mehra (Registered Patient)',
+      email: 'rohan.mehra@example.com',
+      phone: '+91 98765 43210',
+      password: 'password123',
+      role: 'patient',
+      avatar: '🧑',
+      doctorId: null
     }
   ]
 };
@@ -272,6 +296,7 @@ class SQLiteDatabase {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
+        phone TEXT,
         password TEXT NOT NULL,
         role TEXT NOT NULL,
         doctorId TEXT,
@@ -356,12 +381,35 @@ class SQLiteDatabase {
       CREATE INDEX IF NOT EXISTS idx_appointments_date_doc ON appointments(appointmentDate, doctorId);
       CREATE INDEX IF NOT EXISTS idx_consultations_patient_phone ON consultations(patientPhone);
     `);
+
+    // Auto-migrate schema updates if columns missing
+    try {
+      this.sqlite.exec('ALTER TABLE users ADD COLUMN phone TEXT');
+    } catch (e) {}
   }
 
   seedIfEmpty() {
     const clinicCount = this.sqlite.prepare('SELECT COUNT(*) as count FROM clinics').get().count;
     if (clinicCount === 0) {
       this.resetToDefault();
+    } else {
+      // Ensure any newly added default accounts (admin, sample patient) exist
+      const insertUser = this.sqlite.prepare(`
+        INSERT OR IGNORE INTO users (id, name, email, phone, password, role, doctorId, avatar)
+        VALUES (@id, @name, @email, @phone, @password, @role, @doctorId, @avatar)
+      `);
+      for (const u of defaultState.users) {
+        insertUser.run({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone || '',
+          password: u.password,
+          role: u.role,
+          doctorId: u.doctorId || null,
+          avatar: u.avatar || '🧑'
+        });
+      }
     }
   }
 
@@ -1056,6 +1104,47 @@ class SQLiteDatabase {
     };
   }
 
+  // Users & Authentication
+  getUsers() {
+    return this.sqlite.prepare('SELECT id, name, email, phone, role, doctorId, avatar FROM users').all();
+  }
+
+  findUserByEmail(email) {
+    if (!email) return null;
+    return this.sqlite.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email.trim());
+  }
+
+  findUserByPhone(phone) {
+    if (!phone) return null;
+    const clean = phone.replace(/\D/g, '');
+    return this.sqlite.prepare('SELECT * FROM users WHERE phone LIKE ? OR phone LIKE ?').get(`%${phone.trim()}%`, `%${clean}%`);
+  }
+
+  findUserById(id) {
+    if (!id) return null;
+    return this.sqlite.prepare('SELECT * FROM users WHERE id = ?').get(id);
+  }
+
+  createUser(userData) {
+    const newUser = {
+      id: userData.id || `usr-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone || '',
+      password: userData.password,
+      role: userData.role || 'patient',
+      doctorId: userData.doctorId || null,
+      avatar: userData.avatar || (userData.role === 'doctor' ? '👨‍⚕️' : userData.role === 'admin' ? '🛡️' : userData.role === 'receptionist' ? '👩‍💼' : '🧑')
+    };
+
+    this.sqlite.prepare(`
+      INSERT INTO users (id, name, email, phone, password, role, doctorId, avatar)
+      VALUES (@id, @name, @email, @phone, @password, @role, @doctorId, @avatar)
+    `).run(newUser);
+
+    return newUser;
+  }
+
   exportPostgreSQLSchema() {
     return POSTGRES_DDL_SCHEMA;
   }
@@ -1077,6 +1166,16 @@ class JSONFileDatabase {
         if (parsed.clinic && parsed.doctors) {
           if (!parsed.consultations) parsed.consultations = [];
           if (!parsed.notifications) parsed.notifications = [];
+          if (!parsed.users || parsed.users.length === 0) {
+            parsed.users = [...defaultState.users];
+          } else {
+            // Ensure default admin, doctors, receptionist and sample patient exist
+            for (const defU of defaultState.users) {
+              if (!parsed.users.some(u => u.email === defU.email)) {
+                parsed.users.push(defU);
+              }
+            }
+          }
           return parsed;
         }
       }
@@ -1595,6 +1694,53 @@ class JSONFileDatabase {
         patientSatisfactionRating: 4.8
       }
     };
+  }
+
+  // Users & Authentication
+  getUsers() {
+    return (this.data.users || []).map(u => {
+      const { password, ...safe } = u;
+      return safe;
+    });
+  }
+
+  findUserByEmail(email) {
+    if (!email) return null;
+    const clean = email.trim().toLowerCase();
+    return (this.data.users || []).find(u => u.email && u.email.trim().toLowerCase() === clean) || null;
+  }
+
+  findUserByPhone(phone) {
+    if (!phone) return null;
+    const clean = phone.trim().replace(/\D/g, '');
+    return (this.data.users || []).find(u => {
+      if (!u.phone) return false;
+      const uClean = u.phone.replace(/\D/g, '');
+      return u.phone.includes(phone.trim()) || (clean.length >= 6 && uClean.includes(clean));
+    }) || null;
+  }
+
+  findUserById(id) {
+    if (!id) return null;
+    return (this.data.users || []).find(u => u.id === id) || null;
+  }
+
+  createUser(userData) {
+    const newUser = {
+      id: userData.id || `usr-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone || '',
+      password: userData.password,
+      role: userData.role || 'patient',
+      doctorId: userData.doctorId || null,
+      avatar: userData.avatar || (userData.role === 'doctor' ? '👨‍⚕️' : userData.role === 'admin' ? '🛡️' : userData.role === 'receptionist' ? '👩‍💼' : '🧑')
+    };
+
+    if (!this.data.users) this.data.users = [];
+    this.data.users.push(newUser);
+    this.save();
+    return newUser;
   }
 
   exportPostgreSQLSchema() {

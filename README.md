@@ -164,17 +164,22 @@ npm.cmd run dev
 
 ---
 
-## 🧪 Demo Accounts & Role Switcher
+## 🔐 Role-Based Access Control (RBAC) & Production Accounts
 
-| Role | Account Email | Password | Access / Purpose |
+MediQ features production-grade **JWT authentication and Role-Based Access Control (RBAC)** alongside real-time **Socket.io user presence telemetry**:
+
+| Role | Default Account | Password | Accessible Portals & Permissions |
 |---|---|---|---|
-| **Receptionist** | `receptionist@clinic.com` | `password123` | Walk-in tokens, check-ins, reschedule, EHR lookup |
-| **Senior Cardiologist** | `doctor.sharma@clinic.com` | `password123` | Room 101 OPD desk, call patients, digital Rx writer |
-| **General Physician** | `doctor.patel@clinic.com` | `password123` | Room 102 OPD desk, diabetes & general medicine |
-| **Pediatrician** | `doctor.ananya@clinic.com` | `password123` | Room 103 OPD desk, child care consultations |
-| **Patient / Guest** | *No login needed* | *N/A* | Public booking, phone OTP (`1234`), live queue tracking |
+| **Chief Administrator** | `admin@mediq.health` | `adminpassword123` | **Superuser Access**: Operations Analytics, Viva Reports, Database Schema DDL, Reception Desk, Doctor OPD Desk, TV Board, Patient Booking |
+| **Doctor (Cardiology)** | `doctor.sharma@clinic.com` | `password123` | **Doctor OPD Desk**: Room 101, patient chime calling, vitals recording, digital prescription generator, TV Signage |
+| **Doctor (General Medicine)** | `doctor.patel@clinic.com` | `password123` | **Doctor OPD Desk**: Room 102, consultations, EHR history, prescription writer |
+| **Doctor (Pediatrics)** | `doctor.ananya@clinic.com` | `password123` | **Doctor OPD Desk**: Room 103, pediatric queue management |
+| **Receptionist** | `receptionist@clinic.com` | `password123` | **Front Desk & Reception**: 5-second walk-in token issuance, pre-booked appointment check-ins, appointment rescheduling, emergency triage |
+| **Patient** | `rohan.mehra@example.com` | `password123` | **Patient Experience**: Online appointment booking, live token countdown tracker, waiting room TV lobby, digital prescription download |
 
-> 💡 **Tip:** Use the **"Quick Demo Switcher"** in the top-right navbar to switch between Receptionist, Doctor, and Patient views with one click!
+> 💡 **Viva / Demo Mode Preserved:** During college viva evaluations or live demonstrations, use the **"Demo & Viva Quick Access (1-Click Real Auth)"** buttons in the Sign In modal to instantly authenticate as Admin, Doctor, Receptionist, or Patient with real JWT tokens!
+>
+> 🟢 **Real-Time Staff Presence:** Click the **"● Online"** indicator in the navbar to inspect which doctors, front desk staff, administrators, and patients are active in the clinic in real time over WebSockets.
 
 ---
 

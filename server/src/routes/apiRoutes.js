@@ -10,7 +10,10 @@ import * as patientCtrl from '../controllers/patientController.js';
 const router = express.Router();
 
 // Auth
+router.post('/auth/register', authCtrl.register);
 router.post('/auth/login', authCtrl.login);
+router.get('/auth/me', authCtrl.authMiddleware, authCtrl.getCurrentUser);
+router.get('/auth/online-users', authCtrl.getOnlineUsers);
 router.post('/auth/verify-otp', authCtrl.verifyPatientOTP);
 
 // Clinic Info

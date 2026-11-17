@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { OnlineUsersModal } from './OnlineUsersModal';
+import { LoginModal } from './LoginModal';
 import {
   Calendar,
   Ticket,
@@ -17,13 +19,31 @@ import {
   Activity,
   Wifi,
   WifiOff,
-  Building2
+  LogOut,
+  LogIn,
+  Shield,
+  Sparkles
 } from 'lucide-react';
 
 export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
-  const { isConnected, isAudioMuted, toggleSound, testChime } = useSocket();
-  const { user, loginAsReceptionist, loginAsDoctor, logout } = useAuth();
+  const { isConnected, isAudioMuted, toggleSound, testChime, onlineUsers } = useSocket();
+  const {
+    user,
+    role,
+    isAdmin,
+    isDoctor,
+    isReceptionist,
+    isPatient,
+    isAuthenticated,
+    canAccessTab,
+    logout,
+    loginModalOpen,
+    openLoginModal,
+    closeLoginModal
+  } = useAuth();
+
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const [onlineUsersModalOpen, setOnlineUsersModalOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
 
   const handleResetData = async () => {
@@ -39,14 +59,37 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
     }
   };
 
-  const navItems = [
-    { id: 'book', label: 'Book Appointment', icon: Calendar },
-    { id: 'track', label: 'Live Queue Status', icon: Ticket },
-    { id: 'tv', label: 'Waiting Room Screen', icon: Tv },
-    { id: 'reception', label: 'Reception Desk', icon: Users },
-    { id: 'doctor', label: 'Doctor Desk', icon: Stethoscope },
-    { id: 'analytics', label: 'Reports', icon: BarChart3 }
+  // All potential nav items
+  const allNavItems = [
+    { id: 'book', label: 'Book Appointment', icon: Calendar, minRole: 'patient' },
+    { id: 'track', label: 'Live Queue Status', icon: Ticket, minRole: 'patient' },
+    { id: 'tv', label: 'Waiting Room Screen', icon: Tv, minRole: 'patient' },
+    { id: 'reception', label: 'Reception Desk', icon: Users, minRole: 'receptionist' },
+    { id: 'doctor', label: 'Doctor Desk', icon: Stethoscope, minRole: 'doctor' },
+    { id: 'analytics', label: 'Reports & Viva', icon: BarChart3, minRole: 'admin' }
   ];
+
+  // Filter navigation items strictly based on authenticated role
+  const visibleNavItems = allNavItems.filter(item => {
+    if (isAdmin) return true; // Admin gets access to all portals
+    if (isDoctor) return item.id === 'doctor' || item.id === 'tv';
+    if (isReceptionist) return item.id === 'reception' || item.id === 'tv';
+    // Patient or unauthenticated guest:
+    return item.id === 'book' || item.id === 'track' || item.id === 'tv';
+  });
+
+  const getRoleBadge = (userRole) => {
+    switch (userRole) {
+      case 'admin':
+        return <span className="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Admin</span>;
+      case 'doctor':
+        return <span className="bg-teal-100 text-teal-800 border border-teal-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Doctor</span>;
+      case 'receptionist':
+        return <span className="bg-sky-100 text-sky-800 border border-sky-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Reception</span>;
+      default:
+        return <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Patient</span>;
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200 shadow-xs">
@@ -54,17 +97,17 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
       <div className="bg-teal-50 border-b border-teal-100/70 py-1.5 px-4 text-xs text-teal-900 flex items-center justify-between">
         <div className="flex items-center gap-2 mx-auto font-medium">
           <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse inline-block" />
-          <span className="font-semibold text-teal-800">OPD Queue Active</span>
+          <span className="font-semibold text-teal-800">OPD Queue Online</span>
           <span className="text-teal-300">|</span>
           <span className="text-teal-700 truncate max-w-md sm:max-w-xl">
-            {clinic?.activeNotice || 'Emergency and Senior citizen patients are given priority.'}
+            {clinic?.activeNotice || 'Emergency and Senior citizen patients are prioritized.'}
           </span>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 text-[11px] text-teal-700">
           <span className="flex items-center gap-1 font-mono">
             {isConnected ? (
-              <span className="text-teal-700 flex items-center gap-1"><Wifi size={12} /> Live Connected</span>
+              <span className="text-teal-700 flex items-center gap-1"><Wifi size={12} /> WebSocket Live</span>
             ) : (
               <span className="text-rose-600 flex items-center gap-1"><WifiOff size={12} /> Reconnecting</span>
             )}
@@ -75,8 +118,16 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
       {/* Main Header Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Brand & Clinic Title */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('book')}>
-          <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm">
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => {
+            if (isAdmin) setActiveTab('analytics');
+            else if (isDoctor) setActiveTab('doctor');
+            else if (isReceptionist) setActiveTab('reception');
+            else setActiveTab('book');
+          }}
+        >
+          <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-xs">
             <Activity size={22} />
           </div>
           <div>
@@ -84,19 +135,19 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
               <span className="font-extrabold text-lg tracking-tight text-slate-900">
                 MediQ
               </span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                OPD Care
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
+                Healthcare
               </span>
             </div>
-            <p className="text-xs text-slate-500 truncate max-w-[200px] sm:max-w-xs font-normal">
+            <p className="text-xs text-slate-500 truncate max-w-[180px] sm:max-w-xs font-normal">
               {clinic?.name || 'Smart Hospital & Queue Management'}
             </p>
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
+        {/* Role-Filtered Navigation Links (Desktop) */}
         <nav className="hidden lg:flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
@@ -118,6 +169,17 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
 
         {/* Right Action Tools */}
         <div className="flex items-center gap-2">
+          {/* Live Online Presence Pill */}
+          <button
+            onClick={() => setOnlineUsersModalOpen(true)}
+            title="Click to view online staff and active patients"
+            className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-medium transition shadow-2xs"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
+            <span className="font-bold font-mono">{onlineUsers.length}</span>
+            <span className="hidden sm:inline">Online</span>
+          </button>
+
           {/* Audio Chime Controller */}
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-xs">
             <button
@@ -134,106 +196,85 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
               title="Test Chime Sound"
               className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 px-2 py-0.5 hover:bg-slate-100 rounded transition hidden sm:inline-block"
             >
-              Test Chime
+              Chime
             </button>
           </div>
+
+          {/* User Account / Role Widget */}
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 border border-slate-200 shadow-xs transition"
+              >
+                <span className="text-base">{user.avatar || '🧑'}</span>
+                <div className="text-left hidden sm:block">
+                  <span className="block truncate max-w-[110px] leading-tight font-bold">{user.name.split(' ')[0]}</span>
+                  <span className="text-[10px] text-slate-500 capitalize">{user.role}</span>
+                </div>
+                {getRoleBadge(user.role)}
+                <ChevronDown size={13} className="text-slate-400" />
+              </button>
+
+              {roleDropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-slate-200 shadow-lg p-2.5 z-50 text-slate-800 animate-slide-up"
+                  onClick={() => setRoleDropdownOpen(false)}
+                >
+                  <div className="p-2 bg-slate-50 rounded-lg mb-2 border border-slate-100">
+                    <p className="font-bold text-xs text-slate-900">{user.name}</p>
+                    <p className="text-[11px] text-slate-500 font-mono truncate">{user.email || user.phone}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      {getRoleBadge(user.role)}
+                      <span className="text-[10px] text-emerald-700 font-medium">● Signed In</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => openLoginModal()}
+                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-700 font-medium transition"
+                    >
+                      <UserCheck size={14} className="text-teal-600" />
+                      <span>Switch Role / Sign In Another User</span>
+                    </button>
+
+                    <button
+                      onClick={logout}
+                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-rose-600 hover:bg-rose-50 font-semibold transition"
+                    >
+                      <LogOut size={14} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => openLoginModal()}
+              className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition shadow-xs"
+            >
+              <LogIn size={14} />
+              <span>Sign In / Roles</span>
+            </button>
+          )}
 
           {/* Reset Demo Data Button */}
           <button
             onClick={handleResetData}
             disabled={resetting}
-            title="Reset with sample hospital data"
-            className="flex items-center gap-1.5 py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs border border-slate-200 transition shadow-xs disabled:opacity-50"
+            title="Reset system with sample hospital data"
+            className="flex items-center gap-1.5 py-2 px-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-500 text-xs border border-slate-200 transition shadow-2xs disabled:opacity-50"
           >
-            <RotateCcw size={13} className={resetting ? 'animate-spin text-teal-600' : 'text-slate-500'} />
-            <span className="hidden md:inline font-medium">Reset Demo</span>
+            <RotateCcw size={13} className={resetting ? 'animate-spin text-teal-600' : 'text-slate-400'} />
           </button>
-
-          {/* Quick Role Switcher Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 border border-slate-200 shadow-xs transition"
-            >
-              <UserCheck size={14} className="text-teal-600" />
-              <span className="truncate max-w-[100px] sm:max-w-none">
-                {user ? user.name : 'Patient View'}
-              </span>
-              <ChevronDown size={13} className="text-slate-400" />
-            </button>
-
-            {roleDropdownOpen && (
-              <div
-                className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-slate-200 shadow-lg p-2 z-50 text-slate-800"
-                onClick={() => setRoleDropdownOpen(false)}
-              >
-                <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                  Switch Demo View
-                </div>
-
-                <div className="py-1 space-y-1">
-                  <button
-                    onClick={() => {
-                      loginAsReceptionist();
-                      setActiveTab('reception');
-                    }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
-                  >
-                    <span className="text-base">👩‍💼</span>
-                    <div>
-                      <p className="font-semibold text-slate-900">Reception Desk</p>
-                      <p className="text-[11px] text-slate-500">Sunita Sharma</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      loginAsDoctor('doc-1');
-                      setActiveTab('doctor');
-                    }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
-                  >
-                    <span className="text-base">👨‍⚕️</span>
-                    <div>
-                      <p className="font-semibold text-slate-900">Dr. Rajesh Sharma</p>
-                      <p className="text-[11px] text-slate-500">Room 101 • Cardiology</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      loginAsDoctor('doc-2');
-                      setActiveTab('doctor');
-                    }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
-                  >
-                    <span className="text-base">👩‍⚕️</span>
-                    <div>
-                      <p className="font-semibold text-slate-900">Dr. Priya Patel</p>
-                      <p className="text-[11px] text-slate-500">Room 102 • Medicine</p>
-                    </div>
-                  </button>
-                </div>
-
-                {user && (
-                  <div className="border-t border-slate-100 pt-1 mt-1">
-                    <button
-                      onClick={logout}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-600 hover:bg-rose-50 font-medium transition"
-                    >
-                      Return to Patient View
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Mobile Tab Bar */}
       <div className="lg:hidden flex items-center gap-1 overflow-x-auto px-3 py-2 bg-slate-50 border-t border-slate-200">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
@@ -252,6 +293,31 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
           );
         })}
       </div>
+
+      {/* Live Online Users Modal */}
+      <OnlineUsersModal
+        isOpen={onlineUsersModalOpen}
+        onClose={() => setOnlineUsersModalOpen(false)}
+      />
+
+      {/* Role-Based Authentication & Registration Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={closeLoginModal}
+        onLoginSuccess={(loggedUser, nextTab) => {
+          if (nextTab) {
+            setActiveTab(nextTab);
+          } else if (loggedUser.role === 'admin') {
+            setActiveTab('analytics');
+          } else if (loggedUser.role === 'doctor') {
+            setActiveTab('doctor');
+          } else if (loggedUser.role === 'receptionist') {
+            setActiveTab('reception');
+          } else {
+            setActiveTab('book');
+          }
+        }}
+      />
     </header>
   );
 };

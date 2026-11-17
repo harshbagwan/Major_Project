@@ -9,6 +9,7 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [latestCalledToken, setLatestCalledToken] = useState(null);
   const [recentNotifications, setRecentNotifications] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [queueTick, setQueueTick] = useState(0); // trigger re-fetch
 
@@ -21,11 +22,30 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('⚡ Socket.io Connected to Backend');
       setIsConnected(true);
+
+      // If user session exists in localStorage, automatically register presence
+      try {
+        const savedUser = localStorage.getItem('mediq_user');
+        if (savedUser) {
+          const u = JSON.parse(savedUser);
+          newSocket.emit('USER_ONLINE', u);
+        }
+      } catch (e) {}
     });
 
     newSocket.on('disconnect', () => {
       console.log('❌ Socket.io Disconnected');
       setIsConnected(false);
+    });
+
+    newSocket.on('INITIAL_STATE', (data) => {
+      if (data?.onlineUsers) {
+        setOnlineUsers(data.onlineUsers);
+      }
+    });
+
+    newSocket.on('ONLINE_USERS_UPDATE', (users) => {
+      setOnlineUsers(users || []);
     });
 
     newSocket.on('TOKEN_CALLED', (data) => {
@@ -90,6 +110,18 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
+  const emitUserOnline = (userData) => {
+    if (socket && userData) {
+      socket.emit('USER_ONLINE', userData);
+    }
+  };
+
+  const emitUserOffline = () => {
+    if (socket) {
+      socket.emit('USER_OFFLINE');
+    }
+  };
+
   const toggleSound = () => {
     const muted = soundController.toggleMute();
     setIsAudioMuted(muted);
@@ -110,6 +142,9 @@ export const SocketProvider = ({ children }) => {
       latestCalledToken,
       queueTick,
       recentNotifications,
+      onlineUsers,
+      emitUserOnline,
+      emitUserOffline,
       isAudioMuted,
       toggleSound,
       testChime,

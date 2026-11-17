@@ -104,6 +104,12 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(credentials)
   }),
+  register: (payload) => request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
+  getMe: () => request('/auth/me'),
+  getOnlineUsers: () => request('/auth/online-users'),
   verifyOTP: (payload) => request('/auth/verify-otp', {
     method: 'POST',
     body: JSON.stringify(payload)
