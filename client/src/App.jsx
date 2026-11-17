@@ -100,7 +100,7 @@ function MainApp() {
               🏥 <strong>MediQ</strong> • Hospital Appointment & Real-Time OPD Queue Management System
             </p>
             <p className="font-mono text-[11px] text-slate-400">
-              Major Academic Project • Department of Computer Science & Engineering
+              Major Academic Project • Department of CSE (Cybersecurity)
             </p>
           </div>
         </footer>

@@ -229,5 +229,5 @@ To demonstrate real-time synchronization to college professors or examiners:
 
 ## 👨‍💻 Author
 **Harsh Bagwan**  
-*Department of Computer Science & Engineering*  
+*Department of CSE (Cybersecurity)*  
 Major Academic Project 2026
