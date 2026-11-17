@@ -35,7 +35,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-teal-500 selection:text-white">
       {/* Navbar is hidden when on Waiting Room TV mode for full immersion, or visible on hover */}
       {activeTab !== 'tv' && (
         <Navbar
@@ -58,9 +58,9 @@ function MainApp() {
         {activeTab === 'tv' && (
           <div>
             {/* Quick exit TV mode button for desktop demo */}
-            <div className="bg-slate-900/80 px-4 py-2 flex items-center justify-between border-b border-slate-800 text-xs">
-              <span className="text-slate-400">
-                📺 <strong>Waiting Room TV Mode Active:</strong> Running 100% full-width signage.
+            <div className="bg-slate-900 px-4 py-2 flex items-center justify-between border-b border-slate-800 text-xs text-white">
+              <span className="text-slate-300">
+                📺 <strong>Waiting Room TV Signage Active</strong>
               </span>
               <button
                 onClick={() => setActiveTab('reception')}
@@ -94,12 +94,12 @@ function MainApp() {
 
       {/* Footer */}
       {activeTab !== 'tv' && (
-        <footer className="border-t border-slate-900 bg-slate-950/60 py-6 text-center text-xs text-slate-500">
+        <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 mt-12">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>
-              🏥 <strong>MediQ</strong> • Hospital Appointment & Real-Time OPD Queue Management System
+            <p className="text-slate-600">
+              🏥 <strong className="text-slate-800">MediQ</strong> • Hospital Appointment & OPD Queue System
             </p>
-            <p className="font-mono text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500 font-medium">
               Major Academic Project • Department of CSE (Cybersecurity)
             </p>
           </div>

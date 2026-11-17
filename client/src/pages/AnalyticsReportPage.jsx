@@ -15,7 +15,8 @@ import {
   MessageSquare,
   PhoneCall,
   Sparkles,
-  ArrowDownRight
+  ArrowDownRight,
+  X
 } from 'lucide-react';
 
 export const AnalyticsReportPage = () => {
@@ -49,8 +50,7 @@ export const AnalyticsReportPage = () => {
 
   const handleOpenSchema = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/schema/postgresql');
-      const text = await res.text();
+      const text = await api.getSchemaSql();
       setSchemaSql(text);
       setSchemaModalOpen(true);
     } catch (err) {
@@ -76,8 +76,8 @@ export const AnalyticsReportPage = () => {
       ['Walk-in Patients', analytics.walkIns],
       ['Online Bookings', analytics.bookedAppointments],
       ['Missed / No Shows', analytics.noShows],
-      ['Traditional Clinic Wait (Before Pilot)', analytics.pilotImpact?.traditionalWaitMinutes || 52],
-      ['Smart Queue Wait (After Pilot)', analytics.avgWaitTimeMinutes],
+      ['Traditional Clinic Wait (Before MediQ)', analytics.pilotImpact?.traditionalWaitMinutes || 52],
+      ['Smart Queue Wait (With MediQ)', analytics.avgWaitTimeMinutes],
       ['Wait Time Reduction', `${analytics.pilotImpact?.waitTimeReductionPercent || 73}%`]
     ];
 
@@ -85,7 +85,7 @@ export const AnalyticsReportPage = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'Hospital_Queue_Pilot_Impact_Report.csv');
+    link.setAttribute('download', 'MediQ_Hospital_Queue_Analytics_Report.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -93,8 +93,8 @@ export const AnalyticsReportPage = () => {
 
   if (!analytics && loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-20 text-center text-slate-400">
-        Loading clinic analytics & pilot data...
+      <div className="max-w-6xl mx-auto px-4 py-20 text-center text-slate-500">
+        Loading clinic analytics & operational report...
       </div>
     );
   }
@@ -110,33 +110,33 @@ export const AnalyticsReportPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in space-y-8">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Pilot Impact Analytics & Viva Report
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              OPD Operations & Queue Analytics
             </h1>
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              Week 12 Report Ready
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
+              Live Operations Data
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Real usage metrics, waiting time reduction analysis, and database audit logs for college project evaluation and clinic stakeholders.
+          <p className="text-sm text-slate-600 mt-1">
+            Real-time patient throughput, queue wait-time savings, and notification audit logs.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleOpenSchema}
-            className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-800 text-xs font-bold transition shadow-sm"
+            className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold transition shadow-2xs"
           >
-            <Database size={15} />
-            <span>PostgreSQL Schema</span>
+            <Database size={15} className="text-teal-600" />
+            <span>Database Schema (DDL)</span>
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-md shadow-cyan-900/40"
+            className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition shadow-xs"
           >
             <Download size={15} />
             <span>Export Report (CSV)</span>
@@ -147,128 +147,130 @@ export const AnalyticsReportPage = () => {
       {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Patients */}
-        <div className="glass-panel p-5 border-slate-800">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Patients</span>
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Patients</span>
+            <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
               <Users size={18} />
             </div>
           </div>
-          <div className="text-3xl font-black font-mono text-white mt-3">
+          <div className="text-3xl font-black font-mono text-slate-900 mt-3">
             {analytics?.totalPatientsToday || 0}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            <strong className="text-cyan-400">{analytics?.walkIns || 0}</strong> Walk-ins • <strong className="text-cyan-400">{analytics?.bookedAppointments || 0}</strong> Bookings
+          <p className="text-xs text-slate-600 mt-1">
+            <strong className="text-teal-800">{analytics?.walkIns || 0}</strong> Walk-ins • <strong className="text-teal-800">{analytics?.bookedAppointments || 0}</strong> Appointments
           </p>
         </div>
 
         {/* Avg Wait Time */}
-        <div className="glass-panel p-5 border-slate-800">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Avg Wait Time</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Average Wait Time</span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <Clock size={18} />
             </div>
           </div>
-          <div className="text-3xl font-black font-mono text-emerald-400 mt-3">
-            {analytics?.avgWaitTimeMinutes || 12} <span className="text-sm font-normal text-slate-400">mins</span>
+          <div className="text-3xl font-black font-mono text-emerald-800 mt-3">
+            {analytics?.avgWaitTimeMinutes || 12} <span className="text-sm font-normal text-slate-500">min</span>
           </div>
-          <p className="text-[11px] text-emerald-400 font-semibold mt-1 flex items-center gap-1">
-            <ArrowDownRight size={13} /> {impact.waitTimeReductionPercent}% faster than manual token desk
+          <p className="text-xs text-emerald-700 font-medium mt-1 flex items-center gap-1">
+            <ArrowDownRight size={14} /> {impact.waitTimeReductionPercent}% faster than manual token desk
           </p>
         </div>
 
         {/* Avg Consultation Time */}
-        <div className="glass-panel p-5 border-slate-800">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Avg Consult Time</span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Avg Consult Time</span>
+            <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center">
               <BarChart3 size={18} />
             </div>
           </div>
-          <div className="text-3xl font-black font-mono text-indigo-300 mt-3">
-            {analytics?.avgConsultTimeMinutes || 8} <span className="text-sm font-normal text-slate-400">mins</span>
+          <div className="text-3xl font-black font-mono text-sky-900 mt-3">
+            {analytics?.avgConsultTimeMinutes || 8} <span className="text-sm font-normal text-slate-500">min</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Per completed consultation
+          <p className="text-xs text-slate-600 mt-1">
+            Per completed doctor consultation
           </p>
         </div>
 
-        {/* Pilot Satisfaction */}
-        <div className="glass-panel p-5 border-slate-800">
+        {/* Satisfaction Rating */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Pilot Rating</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Patient Satisfaction</span>
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
               <Award size={18} />
             </div>
           </div>
-          <div className="text-3xl font-black font-mono text-amber-400 mt-3">
-            4.8 <span className="text-sm font-normal text-slate-400">/ 5.0</span>
+          <div className="text-3xl font-black font-mono text-amber-900 mt-3">
+            4.8 <span className="text-sm font-normal text-slate-500">/ 5.0</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Based on clinic pilot feedback
+          <p className="text-xs text-slate-600 mt-1">
+            Based on verified clinic feedback
           </p>
         </div>
       </div>
 
-      {/* Week 11-12 Spotlight: Before vs After Pilot Impact Comparison */}
-      <div className="glass-panel p-6 sm:p-8 border-cyan-500/30 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/40 relative overflow-hidden">
+      {/* Before vs After Impact Comparison */}
+      <div className="bg-teal-50/60 border border-teal-200 rounded-2xl p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-md">
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 mb-2">
-              <Sparkles size={12} /> Key Project Viva Deliverable
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-teal-800 bg-teal-100/70 px-2.5 py-0.5 rounded-full border border-teal-200 mb-2">
+              <Sparkles size={13} className="text-teal-700" />
+              <span>Queue Efficiency Impact</span>
             </div>
-            <h2 className="text-xl font-extrabold text-white">
-              Clinic Pilot Results: Before vs. After
+            <h2 className="text-xl font-bold text-slate-900">
+              Clinic Wait Times: Traditional vs. MediQ
             </h2>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Comparison between traditional manual walk-in queuing vs. MediQ real-time token tracking over a 2-day on-site pilot.
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Comparison between traditional manual walk-in queuing versus MediQ real-time token tracking with live status updates.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
             {/* Traditional */}
-            <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-              <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider">Before Pilot</span>
-              <div className="text-2xl font-black font-mono text-slate-300 mt-1 line-through decoration-rose-500">
-                52 mins
+            <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
+              <span className="text-[11px] font-semibold text-rose-700 uppercase tracking-wider">Manual Line</span>
+              <div className="text-2xl font-black font-mono text-slate-400 mt-1 line-through decoration-rose-500">
+                52 min
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Manual Waiting Room</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">Crowded Waiting Room</p>
             </div>
 
             {/* Smart System */}
-            <div className="p-4 rounded-xl bg-cyan-950/60 border border-cyan-500/40 shadow-lg">
-              <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">With System</span>
-              <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
-                {analytics?.avgWaitTimeMinutes || 14} mins
+            <div className="p-4 rounded-xl bg-white border border-teal-300 shadow-2xs ring-1 ring-teal-200">
+              <span className="text-[11px] font-semibold text-teal-800 uppercase tracking-wider">With MediQ</span>
+              <div className="text-2xl font-black font-mono text-teal-900 mt-1">
+                {analytics?.avgWaitTimeMinutes || 14} min
               </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">Phone Notification</p>
+              <p className="text-[11px] text-slate-600 mt-0.5">Live Phone Tracking</p>
             </div>
 
             {/* Reduction */}
-            <div className="col-span-2 sm:col-span-1 p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 shadow-lg">
-              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Wait Time Saved</span>
-              <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
+            <div className="col-span-2 sm:col-span-1 p-4 rounded-xl bg-emerald-600 text-white shadow-xs">
+              <span className="text-[11px] font-semibold text-emerald-100 uppercase tracking-wider">Time Saved</span>
+              <div className="text-2xl font-black font-mono text-white mt-1">
                 -73%
               </div>
-              <p className="text-[10px] text-emerald-300 mt-0.5">38 mins saved / patient</p>
+              <p className="text-[11px] text-emerald-100 mt-0.5">~38 mins saved / patient</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Doctor Performance & OPD Distribution Table */}
-      <div className="glass-panel overflow-hidden border-slate-800">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <Users size={16} className="text-cyan-400" /> Doctor OPD Queue Performance
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <Users size={16} className="text-teal-600" />
+            <span>Doctor OPD Queue Performance</span>
           </h3>
-          <span className="text-xs text-slate-400 font-mono">3 OPD Chambers Active</span>
+          <span className="text-xs text-slate-500 font-mono">3 Active Chambers</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-900/90 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800 font-semibold">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200 font-semibold">
               <tr>
                 <th className="px-5 py-3.5">Doctor</th>
                 <th className="px-5 py-3.5">Specialization & Room</th>
@@ -278,30 +280,30 @@ export const AnalyticsReportPage = () => {
                 <th className="px-5 py-3.5">Currently Serving</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-sans">
+            <tbody className="divide-y divide-slate-100">
               {analytics?.doctorStats?.map((doc) => (
-                <tr key={doc.doctorId} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5 font-bold text-white">
+                <tr key={doc.doctorId} className="hover:bg-slate-50 transition">
+                  <td className="px-5 py-3.5 font-bold text-slate-900">
                     {doc.name}
                   </td>
-                  <td className="px-5 py-3.5 text-slate-300">
+                  <td className="px-5 py-3.5 text-slate-600">
                     <div>{doc.specialization}</div>
-                    <span className="text-[11px] text-slate-400 font-mono">{doc.roomNumber}</span>
+                    <span className="text-[11px] text-slate-500 font-mono">{doc.roomNumber}</span>
                   </td>
-                  <td className="px-5 py-3.5 font-mono font-bold text-slate-200">
+                  <td className="px-5 py-3.5 font-mono font-bold text-slate-800">
                     {doc.totalPatients}
                   </td>
-                  <td className="px-5 py-3.5 font-mono text-emerald-400 font-bold">
+                  <td className="px-5 py-3.5 font-mono text-emerald-700 font-bold">
                     {doc.completed}
                   </td>
-                  <td className="px-5 py-3.5 font-mono text-amber-400 font-bold">
+                  <td className="px-5 py-3.5 font-mono text-amber-700 font-bold">
                     {doc.waiting}
                   </td>
                   <td className="px-5 py-3.5">
-                    <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
                       doc.currentServing !== 'None'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-slate-800 text-slate-500'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-500'
                     }`}>
                       {doc.currentServing}
                     </span>
@@ -314,43 +316,44 @@ export const AnalyticsReportPage = () => {
       </div>
 
       {/* Real-Time SMS & WhatsApp Dispatch Audit Log */}
-      <div className="glass-panel overflow-hidden border-slate-800">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <MessageSquare size={16} className="text-emerald-400" /> WhatsApp Cloud & Twilio SMS Dispatch Audit Log
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <MessageSquare size={16} className="text-emerald-600" />
+            <span>WhatsApp Cloud & SMS Dispatch Audit Log</span>
           </h3>
-          <span className="text-xs text-slate-400">Live API Telemetry</span>
+          <span className="text-xs text-slate-500">Live Telemetry</span>
         </div>
 
         <div className="p-4 space-y-2.5 max-h-72 overflow-y-auto">
           {notifications.length === 0 ? (
-            <p className="text-xs text-slate-500 italic text-center py-4">No notifications dispatched yet.</p>
+            <p className="text-xs text-slate-400 italic text-center py-4">No notifications dispatched yet.</p>
           ) : (
             notifications.map((n) => {
               const isWhatsApp = n.channel === 'WHATSAPP';
               return (
-                <div key={n.id} className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-4 text-xs">
+                <div key={n.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-4 text-xs">
                   <div className="flex items-start gap-3">
                     <div className={`p-1.5 rounded-lg flex-shrink-0 ${
-                      isWhatsApp ? 'bg-emerald-500/20 text-emerald-400' : 'bg-cyan-500/20 text-cyan-400'
+                      isWhatsApp ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'
                     }`}>
                       {isWhatsApp ? <MessageSquare size={16} /> : <PhoneCall size={16} />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white uppercase text-[10px] tracking-wider">
+                        <span className="font-bold text-slate-800 uppercase text-[10px] tracking-wider">
                           {n.channel} • {n.messageType}
                         </span>
-                        <span className="text-[10px] font-mono text-cyan-400">To: {n.recipientPhone}</span>
+                        <span className="text-[11px] font-mono text-slate-600">To: {n.recipientPhone}</span>
                       </div>
-                      <p className="text-slate-300 mt-1 font-sans text-xs leading-relaxed">
+                      <p className="text-slate-700 mt-1 font-sans text-xs leading-relaxed">
                         {n.content}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                    <span className="text-[10px] font-mono font-medium text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200">
                       ✓ Delivered
                     </span>
                     <p className="text-[10px] text-slate-500 mt-1 font-mono">
@@ -364,37 +367,37 @@ export const AnalyticsReportPage = () => {
         </div>
       </div>
 
-      {/* PostgreSQL Schema Modal (Supabase / Railway Ready) */}
+      {/* Relational Database DDL Schema Modal */}
       {schemaModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <Database size={18} className="text-cyan-400" />
-                <h3 className="text-base font-bold text-white">
-                  PostgreSQL Production DDL Schema (Supabase / Railway)
+                <Database size={18} className="text-teal-600" />
+                <h3 className="text-base font-bold text-slate-900">
+                  Relational Database Schema (ANSI SQL / DDL)
                 </h3>
               </div>
               <button
                 onClick={() => setSchemaModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-md transition"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 my-3">
-              Copy and execute this ANSI SQL schema directly into your Supabase SQL editor or Railway PostgreSQL database for cloud deployment.
+            <p className="text-xs text-slate-600 my-3">
+              Production relational database schema with tables, foreign keys, indexes, and constraints.
             </p>
 
-            <div className="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 leading-relaxed">
-              <pre>{schemaSql}</pre>
+            <div className="flex-1 overflow-y-auto bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 leading-relaxed">
+              <pre className="whitespace-pre-wrap">{schemaSql}</pre>
             </div>
 
             <div className="pt-4 flex justify-end gap-3">
               <button
                 onClick={handleCopySchema}
-                className="py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center gap-1.5"
+                className="py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 <span>{copied ? 'Copied to Clipboard!' : 'Copy Schema SQL'}</span>

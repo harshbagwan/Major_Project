@@ -54,8 +54,6 @@ export const DoctorDeskPage = () => {
     followUpDate: ''
   });
 
-  const [activeTab, setActiveTab] = useState('active'); // 'active', 'history'
-
   useEffect(() => {
     loadDoctors();
     loadClinic();
@@ -214,36 +212,36 @@ export const DoctorDeskPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
       {/* Header with Doctor Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Doctor OPD Consultation Desk
             </h1>
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
               Clinical Workspace
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Call patients into your consultation room, ring the waiting room TV chime, and record prescriptions.
+          <p className="text-sm text-slate-600 mt-1">
+            Call patients into your room, ring the waiting room display chime, and create digital medical prescriptions.
           </p>
         </div>
 
         {/* Doctor OPD Switcher */}
-        <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-          <span className="text-xs font-semibold text-slate-400 px-2">Active Doctor:</span>
+        <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-2xs">
+          <span className="text-xs font-medium text-slate-500 px-2">Doctor:</span>
           {doctors.map(d => (
             <button
               key={d.id}
               onClick={() => setSelectedDoctorId(d.id)}
-              className={`py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
                 selectedDoctorId === d.id
-                  ? 'bg-cyan-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-teal-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <span>{d.name.split(' ')[1]}</span>
-              <span className="text-[10px] font-mono opacity-80">({d.roomNumber.split(' ')[0]})</span>
+              <span className="text-[11px] opacity-80">({d.roomNumber.split(' ')[0]})</span>
             </button>
           ))}
         </div>
@@ -253,53 +251,58 @@ export const DoctorDeskPage = () => {
         {/* Left Column: Currently Serving Patient & Consultation Editor (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Active Serving Hero Card */}
-          <div className={`glass-panel p-6 sm:p-8 transition-all ${
+          <div className={`bg-white rounded-2xl border p-6 sm:p-7 shadow-sm transition-all ${
             servingToken
-              ? 'border-emerald-500/50 bg-emerald-950/20 shadow-2xl'
-              : 'border-slate-800 bg-slate-900/40'
+              ? 'border-teal-300 ring-2 ring-teal-50'
+              : 'border-slate-200'
           }`}>
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <Stethoscope size={16} className="text-cyan-400" /> Currently In Consultation
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Stethoscope size={16} className="text-teal-600" />
+                <span>Currently In Consultation</span>
               </span>
-              <span className="text-xs font-mono text-cyan-400 font-semibold">
+              <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md border border-teal-200">
                 {currentDoctor?.roomNumber}
               </span>
             </div>
 
             {servingToken ? (
-              <div className="my-6">
+              <div className="my-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-slate-400">
+                    <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">
                       Token Number
                     </span>
-                    <div className="text-4xl font-black font-mono text-emerald-400 mt-1">
+                    <div className="text-4xl font-black font-mono text-teal-800 mt-1">
                       {servingToken.displayToken}
                     </div>
-                    <h2 className="text-xl font-bold text-white mt-1">
+                    <h2 className="text-xl font-bold text-slate-900 mt-1">
                       {servingToken.patientName}
                     </h2>
-                    <p className="text-xs text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-2">
-                      <span>Phone: {servingToken.patientPhone} • {servingToken.patientAge || 'N/A'} yrs • {servingToken.patientGender}</span>
+                    <div className="text-xs text-slate-600 mt-1 flex flex-wrap items-center gap-2">
+                      <span>Phone: <strong>{servingToken.patientPhone}</strong></span>
+                      <span>•</span>
+                      <span>{servingToken.patientAge || '—'} yrs</span>
+                      <span>•</span>
+                      <span>{servingToken.patientGender}</span>
                       <button
                         type="button"
                         onClick={() => handleOpenPatientHistory(servingToken.patientPhone, servingToken.patientName)}
-                        className="py-0.5 px-2 bg-cyan-950/80 hover:bg-cyan-700 text-cyan-400 hover:text-white border border-cyan-800/60 rounded text-[10px] font-bold flex items-center gap-1 transition"
+                        className="py-0.5 px-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded text-[11px] font-semibold flex items-center gap-1 transition ml-1"
                       >
-                        <History size={11} /> EHR History
+                        <History size={12} /> Medical History
                       </button>
-                    </p>
+                    </div>
                   </div>
 
                   {/* Consultation Time / Wait Time */}
-                  <div className="text-left sm:text-right bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
-                    <span className="text-[11px] text-slate-400 block">Patient Wait Time:</span>
-                    <span className="font-mono font-bold text-amber-400 text-base">
+                  <div className="text-left sm:text-right bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 block">Patient Wait Time:</span>
+                    <span className="font-mono font-bold text-amber-700 text-base">
                       {servingToken.waitTimeMinutes || 12} mins
                     </span>
-                    <span className="text-[10px] text-slate-500 block mt-1">
-                      Reason: <strong className="text-slate-300">{servingToken.reason || 'General Checkup'}</strong>
+                    <span className="text-xs text-slate-500 block mt-0.5">
+                      Reason: <strong className="text-slate-700">{servingToken.reason || 'General Checkup'}</strong>
                     </span>
                   </div>
                 </div>
@@ -309,45 +312,48 @@ export const DoctorDeskPage = () => {
                   <button
                     onClick={handleRecall}
                     title="Ring chime and announce again on Waiting Room TV"
-                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-bold transition border border-slate-700 flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition border border-slate-200 flex items-center justify-center gap-1.5"
                   >
-                    <Volume2 size={15} /> Re-Ring Chime
+                    <Volume2 size={15} className="text-teal-600" />
+                    <span>Re-Ring Chime</span>
                   </button>
 
                   <button
                     onClick={handleMarkNoShow}
                     title="Mark patient as absent"
-                    className="py-2.5 px-3 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 text-rose-400 text-xs font-bold transition border border-rose-800/40 flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition border border-rose-200 flex items-center justify-center gap-1.5"
                   >
-                    <XCircle size={15} /> Mark No-Show
+                    <XCircle size={15} />
+                    <span>Mark Absent</span>
                   </button>
 
                   <button
                     onClick={handleCompleteConsultation}
                     disabled={actionLoading}
-                    className="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-1.5"
+                    className="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition shadow-xs flex items-center justify-center gap-1.5"
                   >
-                    <CheckCircle2 size={15} /> Complete & Next
+                    <CheckCircle2 size={15} />
+                    <span>Complete & Next</span>
                   </button>
                 </div>
               </div>
             ) : (
               <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-slate-800 text-slate-500 flex items-center justify-center mx-auto mb-3">
-                  <User size={30} />
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                  <User size={28} />
                 </div>
-                <h3 className="text-base font-bold text-white">No Patient Currently Inside</h3>
-                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                  Click the button below to call the next patient in line. The waiting room TV will chime and announce their token.
+                <h3 className="text-base font-bold text-slate-800">No Patient Currently Inside</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  Click the button below to call the next patient. The waiting room TV will chime and announce their token.
                 </p>
 
                 <button
                   onClick={() => handleCallNext()}
                   disabled={waitingTokens.length === 0 || actionLoading}
-                  className="mt-6 py-3 px-6 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-950/60 disabled:opacity-40 inline-flex items-center gap-2"
+                  className="mt-5 py-2.5 px-5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs transition shadow-xs disabled:opacity-40 inline-flex items-center gap-2"
                 >
-                  <Volume2 size={16} />
-                  <span>Call Next Patient in Queue ({waitingTokens.length} Waiting)</span>
+                  <Volume2 size={15} />
+                  <span>Call Next Patient ({waitingTokens.length} Waiting)</span>
                 </button>
               </div>
             )}
@@ -355,88 +361,89 @@ export const DoctorDeskPage = () => {
 
           {/* Clinical Prescription & Diagnosis Form */}
           {servingToken && (
-            <div className="glass-panel p-6 sm:p-8 space-y-4 border-slate-800">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2 pb-3 border-b border-slate-800">
-                <FileText size={16} className="text-cyan-400" /> Patient Medical Notes & Prescription
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100">
+                <FileText size={16} className="text-teal-600" />
+                <span>Patient Medical Notes & Prescription</span>
               </h3>
 
               {/* Patient Vitals */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Blood Pressure</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Blood Pressure</label>
                   <input
                     type="text"
                     value={clinicalNotes.bp}
                     onChange={(e) => setClinicalNotes(prev => ({ ...prev, bp: e.target.value }))}
                     placeholder="120/80"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Pulse (bpm)</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Pulse (bpm)</label>
                   <input
                     type="text"
                     value={clinicalNotes.pulse}
                     onChange={(e) => setClinicalNotes(prev => ({ ...prev, pulse: e.target.value }))}
                     placeholder="74"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Temp (°F)</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Temp (°F)</label>
                   <input
                     type="text"
                     value={clinicalNotes.temp}
                     onChange={(e) => setClinicalNotes(prev => ({ ...prev, temp: e.target.value }))}
                     placeholder="98.6"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
               </div>
 
               {/* Diagnosis */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Clinical Diagnosis</label>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Clinical Diagnosis</label>
                 <input
                   type="text"
                   value={clinicalNotes.diagnosis}
                   onChange={(e) => setClinicalNotes(prev => ({ ...prev, diagnosis: e.target.value }))}
                   placeholder="e.g. Mild Angina, Viral Upper Respiratory Tract Infection, Diabetes Type 2"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
 
               {/* Prescription / Medicines */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Prescribed Medicines & Dosage</label>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Prescribed Medicines & Dosage</label>
                 <textarea
                   rows={3}
                   value={clinicalNotes.prescription}
                   onChange={(e) => setClinicalNotes(prev => ({ ...prev, prescription: e.target.value }))}
                   placeholder="1. Tab Paracetamol 650mg - 1 stat, then SOS&#10;2. Tab Amoxicillin 500mg - 1-0-1 x 5 days"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono"
                 />
               </div>
 
               {/* Notes & Follow-up */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Special Advice / Lab Tests</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Special Advice / Lab Tests</label>
                   <input
                     type="text"
                     value={clinicalNotes.notes}
                     onChange={(e) => setClinicalNotes(prev => ({ ...prev, notes: e.target.value }))}
                     placeholder="e.g. Fasting Lipid Profile, Complete Blood Count"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Follow-up Review Date</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Follow-up Review Date</label>
                   <input
                     type="date"
                     value={clinicalNotes.followUpDate}
                     onChange={(e) => setClinicalNotes(prev => ({ ...prev, followUpDate: e.target.value }))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                 </div>
               </div>
@@ -445,9 +452,10 @@ export const DoctorDeskPage = () => {
                 <button
                   type="button"
                   onClick={handleCompleteConsultation}
-                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs transition shadow-xs flex items-center justify-center gap-2"
                 >
-                  <CheckCircle2 size={16} /> Save Prescription & Complete Consultation
+                  <CheckCircle2 size={16} />
+                  <span>Save Prescription & Complete Consultation</span>
                 </button>
               </div>
             </div>
@@ -457,53 +465,55 @@ export const DoctorDeskPage = () => {
         {/* Right Column: Doctor's Queue List & History (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Clock size={16} className="text-cyan-400" /> Waiting in Line ({waitingTokens.length})
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+              <Clock size={16} className="text-teal-600" />
+              <span>Waiting in Line ({waitingTokens.length})</span>
             </h3>
             <button
               onClick={() => loadQueue(selectedDoctorId)}
-              className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition"
+              className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 transition"
             >
-              <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Refresh
+              <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+              <span>Refresh</span>
             </button>
           </div>
 
           <div className="space-y-2.5">
             {waitingTokens.length === 0 ? (
-              <div className="glass-panel p-6 text-center text-slate-500 text-xs italic">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-500 text-xs italic shadow-2xs">
                 All caught up! No waiting patients in this doctor's OPD.
               </div>
             ) : (
-              waitingTokens.map((tok, idx) => {
+              waitingTokens.map((tok) => {
                 const isEmergency = tok.priorityLevel === 3;
                 const isSenior = tok.priorityLevel === 2;
 
                 return (
                   <div
                     key={tok.id}
-                    className={`glass-card p-4 flex items-center justify-between gap-3 border ${
+                    className={`bg-white rounded-xl p-3.5 flex items-center justify-between gap-3 border shadow-2xs transition ${
                       isEmergency
-                        ? 'border-rose-500/40 bg-rose-950/20'
+                        ? 'border-rose-300 bg-rose-50/40'
                         : isSenior
-                        ? 'border-amber-500/40 bg-amber-950/20'
-                        : 'border-slate-800'
+                        ? 'border-amber-300 bg-amber-50/40'
+                        : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="font-mono font-black text-sm text-cyan-400 bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                      <div className="font-mono font-bold text-sm text-teal-800 bg-teal-50 px-2.5 py-1.5 rounded-lg border border-teal-200">
                         {tok.displayToken}
                       </div>
 
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-xs text-white">{tok.patientName}</h4>
+                          <h4 className="font-bold text-xs text-slate-900">{tok.patientName}</h4>
                           {isEmergency && (
-                            <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-0.5">
-                              <Flame size={10} /> URGENT
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-0.5">
+                              <Flame size={10} /> Urgent
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-400 truncate max-w-[170px]">
+                        <p className="text-[11px] text-slate-500 truncate max-w-[170px]">
                           {tok.reason || 'General Consultation'}
                         </p>
                       </div>
@@ -513,7 +523,7 @@ export const DoctorDeskPage = () => {
                       <button
                         onClick={() => handleCallNext(tok.id)}
                         title="Call this specific patient into room"
-                        className="py-1.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition shadow-md shadow-cyan-900/40"
+                        className="py-1.5 px-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs transition shadow-2xs"
                       >
                         Call
                       </button>
@@ -525,30 +535,30 @@ export const DoctorDeskPage = () => {
           </div>
 
           {/* Completed Consultations Summary */}
-          <div className="glass-panel p-5 mt-6 border-slate-800">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 mt-6 shadow-2xs">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-3 flex items-center justify-between">
               <span>Completed Today</span>
-              <span className="font-mono text-emerald-400 font-bold">{completedTokens.length} Patients</span>
+              <span className="font-mono text-emerald-700 font-bold">{completedTokens.length} Patients</span>
             </h4>
 
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
               {completedTokens.length === 0 ? (
-                <p className="text-xs text-slate-500 italic">No consultations finished today yet.</p>
+                <p className="text-xs text-slate-400 italic">No consultations finished today yet.</p>
               ) : (
                 completedTokens.map(tok => (
-                  <div key={tok.id} className="text-xs p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2">
+                  <div key={tok.id} className="text-xs p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
                     <div>
-                      <span className="font-mono font-bold text-slate-300 mr-2">{tok.displayToken}</span>
-                      <span className="text-slate-200 font-medium">{tok.patientName}</span>
+                      <span className="font-mono font-bold text-slate-700 mr-2">{tok.displayToken}</span>
+                      <span className="text-slate-800 font-medium">{tok.patientName}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleViewPrescriptionForToken(tok)}
-                        className="py-1 px-2 bg-cyan-950/80 hover:bg-cyan-700 text-cyan-400 hover:text-white rounded border border-cyan-800/60 text-[10px] font-bold flex items-center gap-1 transition"
+                        className="py-1 px-2 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded border border-teal-200 text-[11px] font-semibold flex items-center gap-1 transition"
                       >
-                        <FileText size={10} /> Rx Slip
+                        <FileText size={11} /> Rx Slip
                       </button>
-                      <span className="text-[10px] font-mono text-emerald-400">
+                      <span className="text-[11px] font-medium text-emerald-700">
                         ✓ Done
                       </span>
                     </div>

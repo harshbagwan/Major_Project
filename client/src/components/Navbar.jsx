@@ -3,7 +3,6 @@ import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import {
-  Activity,
   Calendar,
   Ticket,
   Tv,
@@ -15,9 +14,10 @@ import {
   RotateCcw,
   UserCheck,
   ChevronDown,
-  Sparkles,
+  Activity,
   Wifi,
-  WifiOff
+  WifiOff,
+  Building2
 } from 'lucide-react';
 
 export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
@@ -27,7 +27,7 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
   const [resetting, setResetting] = useState(false);
 
   const handleResetData = async () => {
-    if (confirm('Reset system with fresh realistic pilot clinic data?')) {
+    if (confirm('Reset system with fresh clinic demo data?')) {
       setResetting(true);
       try {
         await api.resetDemoData();
@@ -40,31 +40,33 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
   };
 
   const navItems = [
-    { id: 'book', label: 'Book Appointment', icon: Calendar, badge: null },
-    { id: 'track', label: 'Track Live Queue', icon: Ticket, badge: 'Live' },
-    { id: 'tv', label: 'Waiting Room TV', icon: Tv, badge: 'Signage' },
-    { id: 'reception', label: 'Reception Desk', icon: Users, badge: null },
-    { id: 'doctor', label: 'Doctor OPD Desk', icon: Stethoscope, badge: null },
-    { id: 'analytics', label: 'Analytics & Viva Report', icon: BarChart3, badge: 'KPI' }
+    { id: 'book', label: 'Book Appointment', icon: Calendar },
+    { id: 'track', label: 'Live Queue Status', icon: Ticket },
+    { id: 'tv', label: 'Waiting Room Screen', icon: Tv },
+    { id: 'reception', label: 'Reception Desk', icon: Users },
+    { id: 'doctor', label: 'Doctor Desk', icon: Stethoscope },
+    { id: 'analytics', label: 'Reports', icon: BarChart3 }
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 transition-all">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200 shadow-xs">
       {/* Top Advisory Banner */}
-      <div className="bg-gradient-to-r from-cyan-950/70 via-slate-900 to-indigo-950/70 py-1 px-4 text-center border-b border-white/5 text-[11px] text-slate-300 flex items-center justify-between">
-        <div className="flex items-center gap-2 mx-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-          <span className="font-semibold text-cyan-300">Live OPD Queue Active</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-300 truncate max-w-lg">{clinic?.activeNotice || 'OPD Queue Active. Emergency and Senior patients are prioritized.'}</span>
+      <div className="bg-teal-50 border-b border-teal-100/70 py-1.5 px-4 text-xs text-teal-900 flex items-center justify-between">
+        <div className="flex items-center gap-2 mx-auto font-medium">
+          <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse inline-block" />
+          <span className="font-semibold text-teal-800">OPD Queue Active</span>
+          <span className="text-teal-300">|</span>
+          <span className="text-teal-700 truncate max-w-md sm:max-w-xl">
+            {clinic?.activeNotice || 'Emergency and Senior citizen patients are given priority.'}
+          </span>
         </div>
 
-        <div className="flex items-center gap-3 text-[10px] text-slate-400">
-          <span className="flex items-center gap-1">
+        <div className="hidden sm:flex items-center gap-3 text-[11px] text-teal-700">
+          <span className="flex items-center gap-1 font-mono">
             {isConnected ? (
-              <span className="text-emerald-400 flex items-center gap-1 font-mono"><Wifi size={11} /> 100% Real-time</span>
+              <span className="text-teal-700 flex items-center gap-1"><Wifi size={12} /> Live Connected</span>
             ) : (
-              <span className="text-rose-400 flex items-center gap-1 font-mono"><WifiOff size={11} /> Reconnecting</span>
+              <span className="text-rose-600 flex items-center gap-1"><WifiOff size={12} /> Reconnecting</span>
             )}
           </span>
         </div>
@@ -74,26 +76,26 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Brand & Clinic Title */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('book')}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-950/60 border border-cyan-400/30">
-            <Activity className="text-white" size={22} />
+          <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm">
+            <Activity size={22} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
+              <span className="font-extrabold text-lg tracking-tight text-slate-900">
                 MediQ
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider">
-                Smart OPD
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                OPD Care
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 truncate max-w-[200px] sm:max-w-xs font-normal">
-              {clinic?.tagline || 'Hospital Appointment & Real-Time Queue Management'}
+            <p className="text-xs text-slate-500 truncate max-w-[200px] sm:max-w-xs font-normal">
+              {clinic?.name || 'Smart Hospital & Queue Management'}
             </p>
           </div>
         </div>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+        <nav className="hidden lg:flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -101,21 +103,14 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs font-medium transition-all relative ${
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-lg text-xs transition-all ${
                   isActive
-                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-900/50 font-bold'
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                    ? 'bg-white text-teal-800 font-bold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'
                 }`}
               >
-                <Icon size={15} />
+                <Icon size={15} className={isActive ? 'text-teal-600' : 'text-slate-500'} />
                 <span>{item.label}</span>
-                {item.badge && (
-                  <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-cyan-400 border border-cyan-500/20'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
               </button>
             );
           })}
@@ -124,20 +119,20 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
         {/* Right Action Tools */}
         <div className="flex items-center gap-2">
           {/* Audio Chime Controller */}
-          <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-xs">
             <button
               onClick={toggleSound}
-              title={isAudioMuted ? 'Unmute Audio Chime' : 'Mute Audio Chime'}
+              title={isAudioMuted ? 'Unmute Bell' : 'Mute Bell'}
               className={`p-1.5 rounded-md text-xs transition ${
-                isAudioMuted ? 'text-rose-400 bg-rose-950/30' : 'text-cyan-400 hover:bg-slate-800'
+                isAudioMuted ? 'text-rose-500 bg-rose-50' : 'text-teal-700 hover:bg-slate-100'
               }`}
             >
               {isAudioMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
             <button
               onClick={testChime}
-              title="Test Hospital Chime Sound"
-              className="text-[10px] font-semibold text-slate-300 hover:text-white px-2 py-1 hover:bg-slate-800 rounded transition hidden sm:inline-block"
+              title="Test Chime Sound"
+              className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 px-2 py-0.5 hover:bg-slate-100 rounded transition hidden sm:inline-block"
             >
               Test Chime
             </button>
@@ -147,33 +142,33 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
           <button
             onClick={handleResetData}
             disabled={resetting}
-            title="Reset with realistic demo traffic"
-            className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs border border-slate-800 transition disabled:opacity-50"
+            title="Reset with sample hospital data"
+            className="flex items-center gap-1.5 py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs border border-slate-200 transition shadow-xs disabled:opacity-50"
           >
-            <RotateCcw size={13} className={resetting ? 'animate-spin text-cyan-400' : ''} />
-            <span className="hidden md:inline">Reset Demo</span>
+            <RotateCcw size={13} className={resetting ? 'animate-spin text-teal-600' : 'text-slate-500'} />
+            <span className="hidden md:inline font-medium">Reset Demo</span>
           </button>
 
           {/* Quick Role Switcher Dropdown */}
           <div className="relative">
             <button
               onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-              className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-200 border border-slate-800 transition"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 border border-slate-200 shadow-xs transition"
             >
-              <UserCheck size={14} className="text-cyan-400" />
-              <span className="truncate max-w-[90px] sm:max-w-none">
-                {user ? user.name : 'Guest Patient'}
+              <UserCheck size={14} className="text-teal-600" />
+              <span className="truncate max-w-[100px] sm:max-w-none">
+                {user ? user.name : 'Patient View'}
               </span>
-              <ChevronDown size={13} className="text-slate-500" />
+              <ChevronDown size={13} className="text-slate-400" />
             </button>
 
             {roleDropdownOpen && (
               <div
-                className="absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 animate-scale-in"
+                className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-slate-200 shadow-lg p-2 z-50 text-slate-800"
                 onClick={() => setRoleDropdownOpen(false)}
               >
-                <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800">
-                  Quick Demo Switcher
+                <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                  Switch Demo View
                 </div>
 
                 <div className="py-1 space-y-1">
@@ -182,12 +177,12 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
                       loginAsReceptionist();
                       setActiveTab('reception');
                     }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-800 text-slate-200"
+                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
                   >
-                    <span>👩‍💼</span>
+                    <span className="text-base">👩‍💼</span>
                     <div>
-                      <p className="font-semibold text-white">Reception Desk</p>
-                      <p className="text-[10px] text-slate-400">Sunita Sharma</p>
+                      <p className="font-semibold text-slate-900">Reception Desk</p>
+                      <p className="text-[11px] text-slate-500">Sunita Sharma</p>
                     </div>
                   </button>
 
@@ -196,12 +191,12 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
                       loginAsDoctor('doc-1');
                       setActiveTab('doctor');
                     }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-800 text-slate-200"
+                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
                   >
-                    <span>👨‍⚕️</span>
+                    <span className="text-base">👨‍⚕️</span>
                     <div>
-                      <p className="font-semibold text-white">Dr. Rajesh Sharma</p>
-                      <p className="text-[10px] text-slate-400">Room 101 - Cardiology</p>
+                      <p className="font-semibold text-slate-900">Dr. Rajesh Sharma</p>
+                      <p className="text-[11px] text-slate-500">Room 101 • Cardiology</p>
                     </div>
                   </button>
 
@@ -210,23 +205,23 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
                       loginAsDoctor('doc-2');
                       setActiveTab('doctor');
                     }}
-                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-800 text-slate-200"
+                    className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs hover:bg-slate-50 text-slate-800 transition"
                   >
-                    <span>👩‍⚕️</span>
+                    <span className="text-base">👩‍⚕️</span>
                     <div>
-                      <p className="font-semibold text-white">Dr. Priya Patel</p>
-                      <p className="text-[10px] text-slate-400">Room 102 - Gen Medicine</p>
+                      <p className="font-semibold text-slate-900">Dr. Priya Patel</p>
+                      <p className="text-[11px] text-slate-500">Room 102 • Medicine</p>
                     </div>
                   </button>
                 </div>
 
                 {user && (
-                  <div className="border-t border-slate-800 pt-1 mt-1">
+                  <div className="border-t border-slate-100 pt-1 mt-1">
                     <button
                       onClick={logout}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-950/30"
+                      className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-rose-600 hover:bg-rose-50 font-medium transition"
                     >
-                      Log out
+                      Return to Patient View
                     </button>
                   </div>
                 )}
@@ -237,7 +232,7 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
       </div>
 
       {/* Mobile Tab Bar */}
-      <div className="lg:hidden flex items-center gap-1 overflow-x-auto px-3 py-2 bg-slate-900/60 border-t border-slate-800/60">
+      <div className="lg:hidden flex items-center gap-1 overflow-x-auto px-3 py-2 bg-slate-50 border-t border-slate-200">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -247,8 +242,8 @@ export const Navbar = ({ activeTab, setActiveTab, clinic }) => {
               onClick={() => setActiveTab(item.id)}
               className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-cyan-600 text-white font-bold'
-                  : 'text-slate-400 hover:text-white bg-slate-800/40'
+                  ? 'bg-teal-600 text-white font-bold'
+                  : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
               }`}
             >
               <Icon size={14} />

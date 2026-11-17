@@ -93,6 +93,10 @@ export const api = {
   // Analytics & Reports
   getAnalytics: () => request('/analytics'),
   getNotifications: (limit = 20) => request(`/notifications?limit=${limit}`),
+  getSchemaSql: async () => {
+    const res = await fetch(`${API_BASE}/schema/postgresql`);
+    return res.text();
+  },
   resetDemoData: () => request('/analytics/reset', { method: 'POST' }),
 
   // Auth & Verification

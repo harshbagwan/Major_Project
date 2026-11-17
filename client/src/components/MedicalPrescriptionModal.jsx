@@ -17,31 +17,31 @@ export const MedicalPrescriptionModal = ({ isOpen, onClose, consultation, doctor
     .filter(l => l.length > 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in overflow-y-auto">
+      <div className="bg-white border border-slate-200 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden my-8">
         {/* Modal Controls Header (Hidden in Print) */}
-        <div className="no-print bg-slate-800/90 px-6 py-4 flex items-center justify-between border-b border-slate-700">
+        <div className="no-print bg-slate-50 px-6 py-4 flex items-center justify-between border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg">
+            <span className="p-1.5 bg-teal-100 text-teal-800 rounded-lg">
               <FileText size={18} />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-white">Digital Medical Prescription</h3>
-              <p className="text-[11px] text-slate-400 font-mono">
+              <h3 className="text-sm font-bold text-slate-900">Digital Medical Prescription</h3>
+              <p className="text-[11px] text-slate-500 font-mono">
                 Consultation Ref: {consultation.id}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={printPrescription}
-              className="py-1.5 px-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-950"
+              className="py-1.5 px-3.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-xs"
             >
               <Printer size={15} /> Print / Save as PDF
             </button>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-700 transition"
+              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition"
             >
               <X size={18} />
             </button>
@@ -230,10 +230,10 @@ export const MedicalPrescriptionModal = ({ isOpen, onClose, consultation, doctor
         </div>
 
         {/* Modal Footer Controls (Hidden in Print) */}
-        <div className="no-print bg-slate-800/60 px-6 py-3 flex justify-end border-t border-slate-700">
+        <div className="no-print bg-slate-50 px-6 py-3 flex justify-end border-t border-slate-200">
           <button
             onClick={onClose}
-            className="py-1.5 px-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition"
+            className="py-1.5 px-4 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition"
           >
             Close
           </button>

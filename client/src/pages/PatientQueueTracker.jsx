@@ -87,14 +87,15 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       {/* Search Header */}
       <div className="text-center max-w-xl mx-auto mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-3">
-          <Ticket size={14} /> Live OPD Status
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold mb-3">
+          <Ticket size={14} className="text-teal-600" />
+          <span>Live OPD Queue Status</span>
         </div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">
-          Track Your Live Queue Position
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          Track Your Turn in Real Time
         </h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1">
-          Instant real-time token tracking. No waiting in crowded waiting rooms — monitor your spot from your phone or clinic cafeteria.
+        <p className="text-slate-600 text-sm mt-1.5">
+          Check your live position in line. Rest comfortably in the waiting area or cafeteria until your token is called.
         </p>
 
         {/* Token Search Bar */}
@@ -104,21 +105,21 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
             placeholder="Enter Token (e.g. 104) or Phone Number"
             value={tokenInput}
             onChange={(e) => setTokenInput(e.target.value)}
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            className="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 shadow-xs"
           />
           <button
             type="submit"
             disabled={loading}
-            className="py-3 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-cyan-900/40 flex items-center gap-1.5"
+            className="py-3 px-5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition shadow-xs flex items-center gap-2 disabled:opacity-50"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
             <span>Track</span>
           </button>
         </form>
 
         {/* Quick Demo Token Suggestions */}
-        <div className="flex items-center justify-center gap-2 mt-3 text-xs text-slate-400">
-          <span>Try Demo Tokens:</span>
+        <div className="flex items-center justify-center gap-2 mt-3.5 text-xs text-slate-500">
+          <span>Try sample tokens:</span>
           {['103', '104', '105', '107'].map((tok) => (
             <button
               key={tok}
@@ -127,7 +128,7 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
                 setTokenInput(tok);
                 fetchTokenStatus(tok);
               }}
-              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 font-mono text-[11px] border border-slate-700"
+              className="px-2.5 py-1 rounded-md bg-white hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-mono text-xs border border-slate-200 shadow-2xs transition"
             >
               #{tok}
             </button>
@@ -136,7 +137,7 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
       </div>
 
       {error && (
-        <div className="max-w-md mx-auto p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs text-center mb-6">
+        <div className="max-w-md mx-auto p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm text-center mb-6 shadow-xs">
           {error}
         </div>
       )}
@@ -144,47 +145,49 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
       {tokenData && (
         <div className="space-y-6">
           {/* Main Status Hero Card */}
-          <div className={`glass-panel p-6 sm:p-8 relative overflow-hidden transition-all ${
+          <div className={`bg-white rounded-2xl border p-6 sm:p-8 shadow-sm transition-all ${
             tokenData.token.status === 'serving'
-              ? 'border-emerald-500/60 bg-emerald-950/20 shadow-2xl shadow-emerald-950/40'
+              ? 'border-emerald-300 ring-2 ring-emerald-100'
               : tokenData.tokensAhead === 1
-              ? 'border-amber-500/60 bg-amber-950/20 shadow-2xl shadow-amber-950/40'
-              : 'border-cyan-500/40'
+              ? 'border-amber-300 ring-2 ring-amber-100'
+              : 'border-slate-200'
           }`}>
             {/* Top Status Pill */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-white/10">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Patient Token Slip
                 </span>
-                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   tokenData.token.status === 'serving'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                     : tokenData.tokensAhead === 1
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                    : tokenData.token.status === 'completed'
+                    ? 'bg-slate-100 text-slate-700 border border-slate-200'
+                    : 'bg-teal-100 text-teal-800 border border-teal-200'
                 }`}>
-                  {tokenData.token.status === 'serving' ? '● Serving Now Inside' : tokenData.token.status === 'completed' ? '✓ Completed' : '● In Live Queue'}
+                  {tokenData.token.status === 'serving' ? '● Currently Inside' : tokenData.token.status === 'completed' ? '✓ Consultation Completed' : '● In Waiting Queue'}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Clock size={14} className="text-cyan-400" />
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <Clock size={14} className="text-teal-600" />
                 <span>Checked In: {new Date(tokenData.token.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
 
             {/* Proximity Call Alert Banner */}
             {tokenData.tokensAhead <= 2 && tokenData.token.status === 'waiting' && (
-              <div className="my-5 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 flex items-center gap-3 animate-pulse">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center flex-shrink-0 font-bold">
+              <div className="my-5 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3 text-amber-900">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 font-bold shadow-xs">
                   <BellRing size={20} />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm text-amber-300">
-                    {tokenData.tokensAhead === 1 ? 'You are NEXT in line!' : 'Your turn is approaching!'}
+                  <h4 className="font-bold text-sm text-amber-900">
+                    {tokenData.tokensAhead === 1 ? 'You are next in line!' : 'Your turn is approaching!'}
                   </h4>
-                  <p className="text-xs text-slate-300 mt-0.5">
+                  <p className="text-xs text-amber-800 mt-0.5">
                     Please make your way towards <strong>{tokenData.token.roomNumber}</strong>. Your consultation will begin shortly.
                   </p>
                 </div>
@@ -193,106 +196,106 @@ export const PatientQueueTracker = ({ initialTokenNumber = '104' }) => {
 
             {/* Consultation Completed Hero Display */}
             {tokenData.token.status === 'completed' && (
-              <div className="my-5 p-5 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-cyan-500/20 border border-emerald-500/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="my-5 p-5 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold shadow-lg">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-300">Appointment Done</span>
-                    <h3 className="text-base font-extrabold text-white">
-                      Your Consultation is Completed!
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Completed Visit</span>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Your Consultation is Complete
                     </h3>
-                    <p className="text-xs text-slate-300">Your digital medical prescription is ready for download.</p>
+                    <p className="text-xs text-slate-600">Your digital medical prescription is ready for download and printing.</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleFetchPrescription}
                   disabled={rxLoading}
-                  className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-950/60"
+                  className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-2 shadow-xs"
                 >
                   <FileText size={15} />
-                  <span>{rxLoading ? 'Loading Rx...' : 'View & Print Prescription'}</span>
+                  <span>{rxLoading ? 'Loading...' : 'View & Print Prescription'}</span>
                 </button>
               </div>
             )}
 
             {/* Serving Now Hero Display */}
             {tokenData.token.status === 'serving' && (
-              <div className="my-5 p-5 rounded-2xl bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-cyan-500/30 border border-emerald-400/50 flex items-center justify-between animate-pulse-glow">
+              <div className="my-5 p-5 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-extrabold text-xl shadow-lg">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-xl shadow-xs">
                     ✓
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-300">Doctor Ready</span>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-white">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Doctor Ready</span>
+                    <h3 className="text-lg font-bold text-slate-900">
                       Please enter {tokenData.token.roomNumber} now!
                     </h3>
-                    <p className="text-xs text-slate-300">{tokenData.doctor?.name} is ready to see you.</p>
+                    <p className="text-xs text-slate-600">{tokenData.doctor?.name} is ready to see you.</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Main Token & Queue Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-8 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6 text-center">
               {/* Your Token */}
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-cyan-500/40 shadow-inner">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="p-5 rounded-xl bg-teal-50/70 border border-teal-200">
+                <span className="text-xs font-semibold uppercase tracking-wider text-teal-800">
                   Your Token
                 </span>
-                <div className="text-4xl sm:text-5xl font-black font-mono text-cyan-400 mt-2">
+                <div className="text-4xl sm:text-5xl font-black font-mono text-teal-900 mt-2">
                   {tokenData.token.displayToken}
                 </div>
-                <p className="text-xs text-slate-300 mt-1 font-semibold">{tokenData.token.patientName}</p>
+                <p className="text-xs text-slate-700 mt-1 font-medium">{tokenData.token.patientName}</p>
               </div>
 
               {/* Current Serving */}
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="p-5 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
                   Currently Serving
                 </span>
-                <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-400 mt-2">
-                  {tokenData.currentServing ? tokenData.currentServing.displayToken : 'None'}
+                <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-900 mt-2">
+                  {tokenData.currentServing ? tokenData.currentServing.displayToken : '—'}
                 </div>
-                <p className="text-xs text-slate-400 mt-1">In Doctor's Room</p>
+                <p className="text-xs text-slate-600 mt-1">In Doctor's Room</p>
               </div>
 
               {/* People Ahead & Wait Time */}
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="p-5 rounded-xl bg-amber-50/70 border border-amber-200">
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
                   Estimated Wait Time
                 </span>
-                <div className="text-4xl sm:text-5xl font-black font-mono text-amber-400 mt-2">
-                  ~{tokenData.estimatedWaitMins} <span className="text-lg font-sans font-semibold text-slate-400">mins</span>
+                <div className="text-4xl sm:text-5xl font-black font-mono text-amber-900 mt-2">
+                  ~{tokenData.estimatedWaitMins} <span className="text-lg font-sans font-semibold text-slate-600">min</span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1">
                   <strong>{tokenData.tokensAhead}</strong> patient(s) ahead of you
                 </p>
               </div>
             </div>
 
             {/* Doctor & Room Info Box */}
-            <div className="bg-slate-900/70 rounded-xl p-4 border border-slate-800 flex items-center justify-between gap-4">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 {tokenData.doctor?.avatarUrl && (
                   <img
                     src={tokenData.doctor.avatarUrl}
                     alt={tokenData.doctor.name}
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-700"
+                    className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
                   />
                 )}
                 <div>
-                  <h4 className="font-bold text-sm text-white">{tokenData.doctor?.name}</h4>
-                  <p className="text-xs text-cyan-400 font-medium">{tokenData.doctor?.specialization}</p>
+                  <h4 className="font-bold text-sm text-slate-900">{tokenData.doctor?.name}</h4>
+                  <p className="text-xs text-teal-700 font-medium">{tokenData.doctor?.specialization}</p>
                 </div>
               </div>
 
               <div className="text-right">
-                <span className="text-[11px] text-slate-400 uppercase font-semibold">Consultation Room</span>
-                <p className="font-mono font-bold text-sm text-white">{tokenData.token.roomNumber}</p>
+                <span className="text-[11px] text-slate-500 uppercase font-semibold">Consultation Room</span>
+                <p className="font-bold text-sm text-slate-900">{tokenData.token.roomNumber}</p>
               </div>
             </div>
           </div>

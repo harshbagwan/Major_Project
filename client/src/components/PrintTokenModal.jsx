@@ -9,16 +9,17 @@ export const PrintTokenModal = ({ token, clinic, onClose, onTrack }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
         {/* Modal Top Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
-          <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-            <Printer size={14} /> Official OPD Token Slip
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50">
+          <span className="text-xs font-semibold uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+            <Printer size={14} className="text-teal-600" />
+            <span>OPD Token Slip</span>
           </span>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200 transition"
           >
             <X size={18} />
           </button>
@@ -77,7 +78,6 @@ export const PrintTokenModal = ({ token, clinic, onClose, onTrack }) => {
           {/* QR Code Simulation */}
           <div className="flex flex-col items-center justify-center pt-1 pb-2">
             <div className="p-2 border border-slate-300 rounded bg-slate-50">
-              {/* Simulated SVG QR Code */}
               <svg width="72" height="72" viewBox="0 0 24 24" fill="currentColor" className="text-slate-800">
                 <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm-2 10h8v8H2v-8zm2 2v4h4v-4H4zm10-14h8v8h-8V2zm2 2v4h4V4h-4zm2 10h-2v2h2v-2zm-2 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm-2 2h2v2h-2v-2zm-4-2h2v2h-2v-2zm4-6h2v2h-2v-2z" />
               </svg>
@@ -91,10 +91,10 @@ export const PrintTokenModal = ({ token, clinic, onClose, onTrack }) => {
         </div>
 
         {/* Modal Actions */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex gap-2.5">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-2.5">
           <button
             onClick={handlePrint}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition border border-slate-700"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs transition border border-slate-300 shadow-2xs"
           >
             <Printer size={15} /> Print Slip
           </button>
@@ -103,7 +103,7 @@ export const PrintTokenModal = ({ token, clinic, onClose, onTrack }) => {
               onClose();
               if (onTrack) onTrack(token.tokenNumber);
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-900/40"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs transition shadow-xs"
           >
             <Smartphone size={15} /> Track on Phone
           </button>
